@@ -150,5 +150,22 @@ class KoreanReportLanguageTestCase(unittest.TestCase):
         self.assertEqual(localize_operation_advice("적극 매도", "zh"), "强烈卖出")
 
 
+class IndonesianReportLanguageTestCase(unittest.TestCase):
+    def test_indonesian_is_supported_and_aliases_normalize(self) -> None:
+        self.assertIn("id", SUPPORTED_REPORT_LANGUAGES)
+        self.assertEqual(normalize_report_language("id"), "id")
+        self.assertEqual(normalize_report_language("Indonesian"), "id")
+        self.assertEqual(normalize_report_language("id-ID"), "id")
+
+    def test_indonesian_labels_and_signals_are_localized(self) -> None:
+        labels = get_report_labels("id")
+        self.assertEqual(set(labels), set(get_report_labels("en")))
+        self.assertEqual(labels["report_title"], "Laporan Analisis Saham")
+        self.assertEqual(localize_operation_advice("买入", "id"), "Beli")
+        self.assertEqual(localize_operation_advice("Beli", "en"), "Buy")
+        self.assertEqual(localize_trend_prediction("看多", "id"), "Bullish")
+        self.assertEqual(localize_trend_prediction("Sangat Bullish", "en"), "Strong Bullish")
+
+
 if __name__ == "__main__":
     unittest.main()

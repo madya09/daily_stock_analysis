@@ -156,6 +156,14 @@ def test_request_models_accept_korean_report_language() -> None:
     assert market_review_request.report_language == "ko"
 
 
+def test_request_models_accept_indonesian_report_language() -> None:
+    analyze_request = AnalyzeRequest.model_validate({
+        "stock_code": "BBCA.JK",
+        "report_language": "id",
+    })
+    assert analyze_request.report_language == "id"
+
+
 @pytest.mark.parametrize(
     ("raw_region", "expected"),
     [

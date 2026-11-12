@@ -79,9 +79,14 @@ class TestTwInstitutionRender(unittest.TestCase):
         self.assertEqual(self._render("ok", {}), "")  # ok but empty data -> skip
 
     def test_institution_renders_all_languages_without_keyerror(self):
-        # every new label key must exist in zh/en/ko so a non-zh tw report never KeyErrors.
+        # Every localized label key must exist so regional reports do not KeyError.
         svc = NotificationService.__new__(NotificationService)
-        for lang, token in (("zh", "三大法人"), ("en", "Institutional Flows"), ("ko", "3대 기관")):
+        for lang, token in (
+            ("zh", "三大法人"),
+            ("en", "Institutional Flows"),
+            ("ko", "3대 기관"),
+            ("id", "Arus Dana Institusi Utama"),
+        ):
             lines = []
             blocks = {"institution": dict(_INST_REC), "institution_status": "ok"}
             svc._append_institutional_flow(lines, blocks, get_report_labels(lang))

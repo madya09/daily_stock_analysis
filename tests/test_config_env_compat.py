@@ -14,6 +14,10 @@ class ConfigEnvCompatibilityTestCase(unittest.TestCase):
     def tearDown(self):
         Config.reset_instance()
 
+    def test_report_language_accepts_indonesian(self):
+        self.assertEqual(Config._parse_report_language("id"), "id")
+        self.assertEqual(Config._parse_report_language("Indonesian"), "id")
+
     @patch("src.config.setup_env")
     @patch.object(Config, "_parse_litellm_yaml", return_value=[])
     @patch.object(Config, "_parse_stock_email_groups", return_value=[])

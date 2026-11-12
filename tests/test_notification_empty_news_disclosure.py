@@ -39,6 +39,14 @@ KO_NO_CHANNEL_DISCLOSURE = (
     "⚠️ 뉴스 검색 채널이 설정되지 않아 이번 분석에는 "
     "뉴스 근거를 반영하지 않았습니다."
 )
+ID_ZERO_HIT_DISCLOSURE = (
+    "⚠️ Data berita yang dapat digunakan tidak berhasil diperoleh; "
+    "kesimpulan berikut tidak menggunakan bukti dari berita."
+)
+ID_NO_CHANNEL_DISCLOSURE = (
+    "⚠️ Kanal pencarian berita belum dikonfigurasi; "
+    "analisis ini tidak menggunakan bukti dari berita."
+)
 
 
 def _make_result(
@@ -314,6 +322,7 @@ class SupportedLanguageDisclosureTestCase(unittest.TestCase):
         "zh": (NO_CHANNEL_DISCLOSURE, ZERO_HIT_DISCLOSURE),
         "en": (EN_NO_CHANNEL_DISCLOSURE, EN_ZERO_HIT_DISCLOSURE),
         "ko": (KO_NO_CHANNEL_DISCLOSURE, KO_ZERO_HIT_DISCLOSURE),
+        "id": (ID_NO_CHANNEL_DISCLOSURE, ID_ZERO_HIT_DISCLOSURE),
     }
 
     def setUp(self):

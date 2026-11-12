@@ -112,6 +112,11 @@ def test_daily_analysis_maps_usage_hmac_config_safely() -> None:
     assert "secrets.LLM_USAGE_HMAC_KEY_VERSION" in env["LLM_USAGE_HMAC_KEY_VERSION"]
 
 
+def test_daily_analysis_defaults_to_indonesian_report_language() -> None:
+    env = _load_daily_analysis_env()
+    assert env["REPORT_LANGUAGE"] == "${{ vars.REPORT_LANGUAGE || secrets.REPORT_LANGUAGE || 'id' }}"
+
+
 def test_daily_analysis_maps_prompt_cache_config() -> None:
     env = _load_daily_analysis_env()
 

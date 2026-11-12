@@ -8,7 +8,7 @@ from typing import Any, Dict, Optional
 
 from src.schemas.decision_scale import signal_key_for_score
 
-SUPPORTED_REPORT_LANGUAGES = ("zh", "en", "ko")
+SUPPORTED_REPORT_LANGUAGES = ("zh", "en", "ko", "id")
 
 _REPORT_LANGUAGE_ALIASES = {
     "zh-cn": "zh",
@@ -28,6 +28,10 @@ _REPORT_LANGUAGE_ALIASES = {
     "kr": "ko",
     "ko-kr": "ko",
     "ko_kr": "ko",
+    "indonesian": "id",
+    "bahasa_indonesia": "id",
+    "id-id": "id",
+    "id_id": "id",
 }
 
 _OPERATION_ADVICE_CANONICAL_MAP = {
@@ -63,16 +67,23 @@ _OPERATION_ADVICE_CANONICAL_MAP = {
     "비중축소": "reduce",
     "매도": "sell",
     "적극 매도": "strong_sell",
+    "sangat disarankan beli": "strong_buy",
+    "beli": "buy",
+    "tahan": "hold",
+    "pantau": "watch",
+    "kurangi posisi": "reduce",
+    "jual": "sell",
+    "sangat disarankan jual": "strong_sell",
 }
 
 _OPERATION_ADVICE_TRANSLATIONS = {
-    "strong_buy": {"zh": "强烈买入", "en": "Strong Buy", "ko": "적극 매수"},
-    "buy": {"zh": "买入", "en": "Buy", "ko": "매수"},
-    "hold": {"zh": "持有", "en": "Hold", "ko": "보유"},
-    "watch": {"zh": "观望", "en": "Watch", "ko": "관망"},
-    "reduce": {"zh": "减仓", "en": "Reduce", "ko": "비중축소"},
-    "sell": {"zh": "卖出", "en": "Sell", "ko": "매도"},
-    "strong_sell": {"zh": "强烈卖出", "en": "Strong Sell", "ko": "적극 매도"},
+    "strong_buy": {"zh": "强烈买入", "en": "Strong Buy", "ko": "적극 매수", "id": "Sangat Disarankan Beli"},
+    "buy": {"zh": "买入", "en": "Buy", "ko": "매수", "id": "Beli"},
+    "hold": {"zh": "持有", "en": "Hold", "ko": "보유", "id": "Tahan"},
+    "watch": {"zh": "观望", "en": "Watch", "ko": "관망", "id": "Pantau"},
+    "reduce": {"zh": "减仓", "en": "Reduce", "ko": "비중축소", "id": "Kurangi Posisi"},
+    "sell": {"zh": "卖出", "en": "Sell", "ko": "매도", "id": "Jual"},
+    "strong_sell": {"zh": "强烈卖出", "en": "Strong Sell", "ko": "적극 매도", "id": "Sangat Disarankan Jual"},
 }
 
 _TREND_PREDICTION_CANONICAL_MAP = {
@@ -104,14 +115,17 @@ _TREND_PREDICTION_CANONICAL_MAP = {
     "횡보": "sideways",
     "하락": "bearish",
     "강한 하락": "strong_bearish",
+    "sangat bullish": "strong_bullish",
+    "mendatar": "sideways",
+    "sangat bearish": "strong_bearish",
 }
 
 _TREND_PREDICTION_TRANSLATIONS = {
-    "strong_bullish": {"zh": "强烈看多", "en": "Strong Bullish", "ko": "강한 상승"},
-    "bullish": {"zh": "看多", "en": "Bullish", "ko": "상승"},
-    "sideways": {"zh": "震荡", "en": "Sideways", "ko": "횡보"},
-    "bearish": {"zh": "看空", "en": "Bearish", "ko": "하락"},
-    "strong_bearish": {"zh": "强烈看空", "en": "Strong Bearish", "ko": "강한 하락"},
+    "strong_bullish": {"zh": "强烈看多", "en": "Strong Bullish", "ko": "강한 상승", "id": "Sangat Bullish"},
+    "bullish": {"zh": "看多", "en": "Bullish", "ko": "상승", "id": "Bullish"},
+    "sideways": {"zh": "震荡", "en": "Sideways", "ko": "횡보", "id": "Mendatar"},
+    "bearish": {"zh": "看空", "en": "Bearish", "ko": "하락", "id": "Bearish"},
+    "strong_bearish": {"zh": "强烈看空", "en": "Strong Bearish", "ko": "강한 하락", "id": "Sangat Bearish"},
 }
 
 _CONFIDENCE_LEVEL_CANONICAL_MAP = {
@@ -125,12 +139,15 @@ _CONFIDENCE_LEVEL_CANONICAL_MAP = {
     "높음": "high",
     "보통": "medium",
     "낮음": "low",
+    "tinggi": "high",
+    "sedang": "medium",
+    "rendah": "low",
 }
 
 _CONFIDENCE_LEVEL_TRANSLATIONS = {
-    "high": {"zh": "高", "en": "High", "ko": "높음"},
-    "medium": {"zh": "中", "en": "Medium", "ko": "보통"},
-    "low": {"zh": "低", "en": "Low", "ko": "낮음"},
+    "high": {"zh": "高", "en": "High", "ko": "높음", "id": "Tinggi"},
+    "medium": {"zh": "中", "en": "Medium", "ko": "보통", "id": "Sedang"},
+    "low": {"zh": "低", "en": "Low", "ko": "낮음", "id": "Rendah"},
 }
 
 _STRATEGY_SIGNAL_CANONICAL_MAP = {
@@ -146,14 +163,19 @@ _STRATEGY_SIGNAL_CANONICAL_MAP = {
     "strong sell": "strong_sell",
     "strong_sell": "strong_sell",
     "强烈卖出": "strong_sell",
+    "sangat disarankan beli": "strong_buy",
+    "beli": "buy",
+    "tahan": "hold",
+    "jual": "sell",
+    "sangat disarankan jual": "strong_sell",
 }
 
 _STRATEGY_SIGNAL_TRANSLATIONS = {
-    "strong_buy": {"zh": "强烈买入", "en": "Strong Buy", "ko": "적극 매수"},
-    "buy": {"zh": "买入", "en": "Buy", "ko": "매수"},
-    "hold": {"zh": "持有", "en": "Hold", "ko": "보유"},
-    "sell": {"zh": "卖出", "en": "Sell", "ko": "매도"},
-    "strong_sell": {"zh": "强烈卖出", "en": "Strong Sell", "ko": "적극 매도"},
+    "strong_buy": {"zh": "强烈买入", "en": "Strong Buy", "ko": "적극 매수", "id": "Sangat Disarankan Beli"},
+    "buy": {"zh": "买入", "en": "Buy", "ko": "매수", "id": "Beli"},
+    "hold": {"zh": "持有", "en": "Hold", "ko": "보유", "id": "Tahan"},
+    "sell": {"zh": "卖出", "en": "Sell", "ko": "매도", "id": "Jual"},
+    "strong_sell": {"zh": "强烈卖出", "en": "Strong Sell", "ko": "적극 매도", "id": "Sangat Disarankan Jual"},
 }
 
 _CONSENSUS_LEVEL_CANONICAL_MAP = {
@@ -167,13 +189,17 @@ _CONSENSUS_LEVEL_CANONICAL_MAP = {
     "证据不足": "insufficient",
     "Insufficient": "insufficient",
     "증거 부족": "insufficient",
+    "tinggi": "high",
+    "sedang": "medium",
+    "rendah": "low",
+    "tidak cukup": "insufficient",
 }
 
 _CONSENSUS_LEVEL_TRANSLATIONS = {
-    "high": {"zh": "高", "en": "High", "ko": "높음"},
-    "medium": {"zh": "中", "en": "Medium", "ko": "보통"},
-    "low": {"zh": "低", "en": "Low", "ko": "낮음"},
-    "insufficient": {"zh": "证据不足", "en": "Insufficient", "ko": "증거 부족"},
+    "high": {"zh": "高", "en": "High", "ko": "높음", "id": "Tinggi"},
+    "medium": {"zh": "中", "en": "Medium", "ko": "보통", "id": "Sedang"},
+    "low": {"zh": "低", "en": "Low", "ko": "낮음", "id": "Rendah"},
+    "insufficient": {"zh": "证据不足", "en": "Insufficient", "ko": "증거 부족", "id": "Tidak Cukup"},
 }
 
 _CONFLICT_SEVERITY_CANONICAL_MAP = {
@@ -185,13 +211,17 @@ _CONFLICT_SEVERITY_CANONICAL_MAP = {
     "中": "medium",
     "high": "high",
     "高": "high",
+    "tidak ada": "none",
+    "rendah": "low",
+    "sedang": "medium",
+    "tinggi": "high",
 }
 
 _CONFLICT_SEVERITY_TRANSLATIONS = {
-    "none": {"zh": "无", "en": "None", "ko": "없음"},
-    "low": {"zh": "低", "en": "Low", "ko": "낮음"},
-    "medium": {"zh": "中", "en": "Medium", "ko": "보통"},
-    "high": {"zh": "高", "en": "High", "ko": "높음"},
+    "none": {"zh": "无", "en": "None", "ko": "없음", "id": "Tidak Ada"},
+    "low": {"zh": "低", "en": "Low", "ko": "낮음", "id": "Rendah"},
+    "medium": {"zh": "中", "en": "Medium", "ko": "보통", "id": "Sedang"},
+    "high": {"zh": "高", "en": "High", "ko": "높음", "id": "Tinggi"},
 }
 
 _STRATEGY_SKILL_CANONICAL_MAP = {
@@ -240,24 +270,39 @@ _STRATEGY_SKILL_CANONICAL_MAP = {
     "wave theory": "wave_theory",
     "wave_theory": "wave_theory",
     "波浪理论": "wave_theory",
+    "tren bullish": "bull_trend",
+    "tema populer": "hot_theme",
+    "penembusan dengan volume": "volume_breakout",
+    "persilangan emas ma": "ma_golden_cross",
+    "kualitas pertumbuhan": "growth_quality",
+    "lonjakan volume di dasar": "bottom_volume",
+    "pergerakan dalam rentang": "box_oscillation",
+    "struktur teori chan": "chan_theory",
+    "strategi saham pemimpin": "dragon_head",
+    "siklus sentimen": "emotion_cycle",
+    "berbasis peristiwa": "event_driven",
+    "penyesuaian ulang ekspektasi": "expectation_repricing",
+    "satu candlestick bullish, tiga bearish": "one_yang_three_yin",
+    "koreksi dengan volume menyusut": "shrink_pullback",
+    "teori gelombang": "wave_theory",
 }
 
 _STRATEGY_SKILL_TRANSLATIONS = {
-    "bull_trend": {"zh": "默认多头趋势", "en": "Bull Trend", "ko": "기본 상승 추세"},
-    "hot_theme": {"zh": "热点题材", "en": "Hot Theme", "ko": "핫 테마"},
-    "volume_breakout": {"zh": "放量突破", "en": "Volume Breakout", "ko": "거래량 돌파"},
-    "ma_golden_cross": {"zh": "均线金叉", "en": "MA Golden Cross", "ko": "이평선 골든크로스"},
-    "growth_quality": {"zh": "成长质量", "en": "Growth Quality", "ko": "성장 품질"},
-    "bottom_volume": {"zh": "底部放量", "en": "Bottom Volume", "ko": "저점 거래량"},
-    "box_oscillation": {"zh": "箱体震荡", "en": "Box Oscillation", "ko": "박스권 등락"},
-    "chan_theory": {"zh": "缠论结构", "en": "Chan Theory", "ko": "찬 이론 구조"},
-    "dragon_head": {"zh": "龙头战法", "en": "Dragon Head", "ko": "대장주 전략"},
-    "emotion_cycle": {"zh": "情绪周期", "en": "Emotion Cycle", "ko": "심리 사이클"},
-    "event_driven": {"zh": "事件驱动", "en": "Event Driven", "ko": "이벤트 드리븐"},
-    "expectation_repricing": {"zh": "预期重估", "en": "Expectation Repricing", "ko": "기대 재평가"},
-    "one_yang_three_yin": {"zh": "一阳三阴", "en": "One Yang Three Yin", "ko": "일양삼음"},
-    "shrink_pullback": {"zh": "缩量回踩", "en": "Shrink Pullback", "ko": "거래량 축소 눌림"},
-    "wave_theory": {"zh": "波浪理论", "en": "Wave Theory", "ko": "파동 이론"},
+    "bull_trend": {"zh": "默认多头趋势", "en": "Bull Trend", "ko": "기본 상승 추세", "id": "Tren Bullish"},
+    "hot_theme": {"zh": "热点题材", "en": "Hot Theme", "ko": "핫 테마", "id": "Tema Populer"},
+    "volume_breakout": {"zh": "放量突破", "en": "Volume Breakout", "ko": "거래량 돌파", "id": "Penembusan dengan Volume"},
+    "ma_golden_cross": {"zh": "均线金叉", "en": "MA Golden Cross", "ko": "이평선 골든크로스", "id": "Persilangan Emas MA"},
+    "growth_quality": {"zh": "成长质量", "en": "Growth Quality", "ko": "성장 품질", "id": "Kualitas Pertumbuhan"},
+    "bottom_volume": {"zh": "底部放量", "en": "Bottom Volume", "ko": "저점 거래량", "id": "Lonjakan Volume di Dasar"},
+    "box_oscillation": {"zh": "箱体震荡", "en": "Box Oscillation", "ko": "박스권 등락", "id": "Pergerakan dalam Rentang"},
+    "chan_theory": {"zh": "缠论结构", "en": "Chan Theory", "ko": "찬 이론 구조", "id": "Struktur Teori Chan"},
+    "dragon_head": {"zh": "龙头战法", "en": "Dragon Head", "ko": "대장주 전략", "id": "Strategi Saham Pemimpin"},
+    "emotion_cycle": {"zh": "情绪周期", "en": "Emotion Cycle", "ko": "심리 사이클", "id": "Siklus Sentimen"},
+    "event_driven": {"zh": "事件驱动", "en": "Event Driven", "ko": "이벤트 드리븐", "id": "Berbasis Peristiwa"},
+    "expectation_repricing": {"zh": "预期重估", "en": "Expectation Repricing", "ko": "기대 재평가", "id": "Penyesuaian Ulang Ekspektasi"},
+    "one_yang_three_yin": {"zh": "一阳三阴", "en": "One Yang Three Yin", "ko": "일양삼음", "id": "Satu Candlestick Bullish, Tiga Bearish"},
+    "shrink_pullback": {"zh": "缩量回踩", "en": "Shrink Pullback", "ko": "거래량 축소 눌림", "id": "Koreksi dengan Volume Menyusut"},
+    "wave_theory": {"zh": "波浪理论", "en": "Wave Theory", "ko": "파동 이론", "id": "Teori Gelombang"},
 }
 
 _CHIP_HEALTH_CANONICAL_MAP = {
@@ -270,12 +315,15 @@ _CHIP_HEALTH_CANONICAL_MAP = {
     "양호": "healthy",
     "보통": "average",
     "주의": "caution",
+    "sehat": "healthy",
+    "cukup": "average",
+    "waspada": "caution",
 }
 
 _CHIP_HEALTH_TRANSLATIONS = {
-    "healthy": {"zh": "健康", "en": "Healthy", "ko": "양호"},
-    "average": {"zh": "一般", "en": "Average", "ko": "보통"},
-    "caution": {"zh": "警惕", "en": "Caution", "ko": "주의"},
+    "healthy": {"zh": "健康", "en": "Healthy", "ko": "양호", "id": "Sehat"},
+    "average": {"zh": "一般", "en": "Average", "ko": "보통", "id": "Cukup"},
+    "caution": {"zh": "警惕", "en": "Caution", "ko": "주의", "id": "Waspada"},
 }
 
 _BIAS_STATUS_CANONICAL_MAP = {
@@ -290,36 +338,43 @@ _BIAS_STATUS_CANONICAL_MAP = {
     "안전": "safe",
     "경계": "caution",
     "위험": "danger",
+    "aman": "safe",
+    "waspada": "caution",
+    "berbahaya": "danger",
 }
 
 _BIAS_STATUS_TRANSLATIONS = {
-    "safe": {"zh": "安全", "en": "Safe", "ko": "안전"},
-    "caution": {"zh": "警戒", "en": "Caution", "ko": "경계"},
-    "danger": {"zh": "危险", "en": "Danger", "ko": "위험"},
+    "safe": {"zh": "安全", "en": "Safe", "ko": "안전", "id": "Aman"},
+    "caution": {"zh": "警戒", "en": "Caution", "ko": "경계", "id": "Waspada"},
+    "danger": {"zh": "危险", "en": "Danger", "ko": "위험", "id": "Berbahaya"},
 }
 
 _PLACEHOLDER_BY_LANGUAGE = {
     "zh": "待补充",
     "en": "TBD",
     "ko": "미정",
+    "id": "Belum tersedia",
 }
 
 _UNKNOWN_BY_LANGUAGE = {
     "zh": "未知",
     "en": "Unknown",
     "ko": "알 수 없음",
+    "id": "Tidak diketahui",
 }
 
 _NO_DATA_BY_LANGUAGE = {
     "zh": "数据缺失",
     "en": "Data unavailable",
     "ko": "데이터 없음",
+    "id": "Data tidak tersedia",
 }
 
 _CHIP_UNAVAILABLE_BY_LANGUAGE = {
     "zh": "筹码分布未启用或数据源暂不可用，未纳入筹码判断。",
     "en": "Chip distribution is disabled or temporarily unavailable; chip signals were not used.",
     "ko": "매물대가 비활성화되었거나 데이터 소스를 일시적으로 사용할 수 없어 매물대 신호를 반영하지 않았습니다.",
+    "id": "Distribusi kepemilikan saham dinonaktifkan atau sumber data sementara tidak tersedia; sinyal ini tidak digunakan dalam analisis.",
 }
 
 _CHIP_PLACEHOLDER_EXACT = {
@@ -357,6 +412,7 @@ _GENERIC_STOCK_NAME_BY_LANGUAGE = {
     "zh": "待确认股票",
     "en": "Unnamed Stock",
     "ko": "미확인 종목",
+    "id": "Saham Belum Dikenal",
 }
 
 _REPORT_LABELS: Dict[str, Dict[str, str]] = {
@@ -765,6 +821,141 @@ _REPORT_LABELS: Dict[str, Dict[str, str]] = {
         "strategy_opposing_skills_label": "반대 전략",
         "strategy_invalid_opinions_label": "추가로 {count}개 전략이 유효한 신호를 생성하지 못했습니다",
     },
+    "id": {
+        "dashboard_title": "Dasbor Keputusan",
+        "brief_title": "Ringkasan Keputusan",
+        "analyzed_prefix": "Dianalisis",
+        "stock_unit": "saham",
+        "stock_unit_compact": "saham",
+        "buy_label": "Beli",
+        "watch_label": "Pantau",
+        "sell_label": "Jual",
+        "summary_heading": "Ringkasan",
+        "info_heading": "Informasi Penting",
+        "sentiment_summary_label": "Sentimen",
+        "earnings_outlook_label": "Prospek Kinerja",
+        "risk_alerts_label": "Peringatan Risiko",
+        "positive_catalysts_label": "Katalis Positif",
+        "latest_news_label": "Berita Terbaru",
+        "core_conclusion_heading": "Kesimpulan Utama",
+        "one_sentence_label": "Keputusan Singkat",
+        "time_sensitivity_label": "Jangka Waktu",
+        "default_time_sensitivity": "Minggu ini",
+        "position_status_label": "Posisi",
+        "action_advice_label": "Tindakan",
+        "no_position_label": "Belum Memiliki Saham",
+        "has_position_label": "Sudah Memiliki Saham",
+        "continue_holding": "Tetap pertahankan",
+        "market_snapshot_heading": "Ringkasan Pasar",
+        "close_label": "Penutupan",
+        "prev_close_label": "Penutupan Sebelumnya",
+        "open_label": "Pembukaan",
+        "high_label": "Tertinggi",
+        "low_label": "Terendah",
+        "change_pct_label": "Perubahan %",
+        "change_amount_label": "Perubahan",
+        "amplitude_label": "Rentang Pergerakan",
+        "volume_label": "Volume",
+        "amount_label": "Nilai Transaksi",
+        "current_price_label": "Harga",
+        "volume_ratio_label": "Rasio Volume",
+        "turnover_rate_label": "Tingkat Perputaran",
+        "source_label": "Sumber",
+        "data_sources_label": "Sumber Data",
+        "data_perspective_heading": "Tinjauan Data",
+        "ma_alignment_label": "Susunan MA",
+        "bullish_alignment_label": "Susunan Bullish",
+        "yes_label": "Ya",
+        "no_label": "Tidak",
+        "none_label": "Tidak ada",
+        "trend_strength_label": "Kekuatan Tren",
+        "price_metrics_label": "Indikator Harga",
+        "ma5_label": "MA5",
+        "ma10_label": "MA10",
+        "ma20_label": "MA20",
+        "bias_ma5_label": "Deviasi (MA5)",
+        "support_level_label": "Level Dukungan",
+        "resistance_level_label": "Level Resistansi",
+        "chip_label": "Struktur Kepemilikan",
+        "phase_decision_heading": "Panduan Keputusan Berdasarkan Fase",
+        "action_window_label": "Waktu Tindakan",
+        "immediate_action_label": "Tindakan Saat Ini",
+        "watch_conditions_label": "Kondisi yang Perlu Dipantau",
+        "next_check_time_label": "Pemeriksaan Berikutnya",
+        "confidence_reason_label": "Alasan Tingkat Keyakinan",
+        "data_limitations_label": "Keterbatasan Data",
+        "battle_plan_heading": "Rencana Tindakan",
+        "ideal_buy_label": "Harga Masuk Ideal",
+        "secondary_buy_label": "Harga Masuk Alternatif",
+        "stop_loss_label": "Batas Kerugian",
+        "take_profit_label": "Target Keuntungan",
+        "suggested_position_label": "Ukuran Posisi",
+        "entry_plan_label": "Rencana Masuk",
+        "risk_control_label": "Pengendalian Risiko",
+        "checklist_heading": "Daftar Periksa",
+        "failed_checks_heading": "Pemeriksaan yang Belum Terpenuhi",
+        "history_compare_heading": "Perbandingan Sinyal Historis",
+        "time_label": "Waktu",
+        "score_label": "Skor",
+        "advice_label": "Saran",
+        "trend_label": "Tren",
+        "generated_at_label": "Dibuat Pada",
+        "report_time_label": "Waktu Pembuatan",
+        "no_results": "Tidak ada hasil analisis",
+        "report_title": "Laporan Analisis Saham",
+        "avg_score_label": "Skor Rata-rata",
+        "action_points_heading": "Level Harga Tindakan",
+        "position_advice_heading": "Saran Posisi",
+        "analysis_model_label": "Model",
+        "not_investment_advice": "Konten dibuat oleh AI untuk referensi saja dan bukan merupakan saran investasi.",
+        "details_report_hint": "Lihat laporan lengkap:",
+        "financial_summary_heading": "Ringkasan Keuangan",
+        "report_date_label": "Tanggal Laporan",
+        "revenue_label": "Pendapatan",
+        "net_profit_label": "Laba Bersih",
+        "operating_cash_flow_label": "Arus Kas Operasi",
+        "roe_label": "ROE",
+        "revenue_yoy_label": "Pertumbuhan Pendapatan Tahunan",
+        "net_profit_yoy_label": "Pertumbuhan Laba Bersih Tahunan",
+        "gross_margin_label": "Margin Laba Kotor",
+        "shareholder_return_heading": "Imbal Hasil Pemegang Saham",
+        "ttm_cash_dividend_label": "Dividen Tunai per Saham 12 Bulan (Sebelum Pajak)",
+        "ttm_event_count_label": "Jumlah Pembayaran Dividen 12 Bulan",
+        "ttm_dividend_yield_label": "Imbal Hasil Dividen TTM",
+        "latest_ex_dividend_label": "Tanggal Ex-Dividen Terbaru",
+        "institutional_flow_heading": "Arus Dana Institusi Utama",
+        "institutional_flow_note": "Positif = beli bersih, negatif = jual bersih; satuan: saham.",
+        "inst_foreign_label": "Investor Asing",
+        "inst_trust_label": "Reksa Dana",
+        "inst_dealer_label": "Perusahaan Sekuritas",
+        "inst_total_label": "Total Institusi Utama",
+        "related_boards_heading": "Sektor Terkait",
+        "industry_boards_heading": "Sektor Industri",
+        "concept_boards_heading": "Tema",
+        "board_name_label": "Sektor",
+        "board_type_label": "Jenis",
+        "board_status_label": "Status",
+        "board_change_pct_label": "Perubahan %",
+        "leading_board_label": "Terkuat",
+        "lagging_board_label": "Terlemah",
+        "signal_attribution_heading": "Analisis Kontributor Sinyal",
+        "attribution_weights_label": "Bobot Kontribusi",
+        "technical_indicators_label": "Indikator Teknikal",
+        "news_sentiment_label": "Sentimen Berita",
+        "fundamentals_label": "Fundamental",
+        "market_conditions_label": "Kondisi Pasar",
+        "strongest_bullish_signal_label": "Sinyal Bullish Terkuat",
+        "strongest_bearish_signal_label": "Sinyal Bearish Terkuat",
+        "strategy_synthesis_heading": "Rangkuman Strategi",
+        "strategy_final_signal_label": "Sinyal Akhir",
+        "strategy_consensus_level_label": "Tingkat Konsensus",
+        "strategy_conflict_label": "Konflik",
+        "strategy_confidence_label": "Tingkat Keyakinan",
+        "strategy_summary_label": "Ringkasan",
+        "strategy_supporting_skills_label": "Strategi Pendukung",
+        "strategy_opposing_skills_label": "Strategi yang Berlawanan",
+        "strategy_invalid_opinions_label": "{count} strategi tambahan gagal menghasilkan sinyal yang valid",
+    },
 }
 
 _DECISION_INTENT_NEGATIONS = (
@@ -934,14 +1125,14 @@ def _is_placeholder_stock_name(value: Any, code: Any = None) -> bool:
     lowered = text.lower()
     if lowered in {"n/a", "na", "none", "null", "unknown"}:
         return True
-    if text in {"-", "—", "未知", "待补充"}:
+    if text in {"-", "—", "未知", "待补充", "Tidak diketahui", "Belum tersedia"}:
         return True
 
     code_text = str(code or "").strip()
     if code_text and lowered == code_text.lower():
         return True
 
-    return text.startswith("股票")
+    return text.startswith("股票") or text == "Saham Belum Dikenal"
 
 
 def _translate_from_map(
@@ -1088,21 +1279,25 @@ def localize_strategy_conflict_description(conflict_type: Any, language: Optiona
             "zh": "策略方向出现对立：部分策略看多，部分策略看空，综合结论需要降低确定性。",
             "en": "Strategy directions diverge: some strategies are bullish while others are bearish, so conviction should be reduced.",
             "ko": "전략 방향이 엇갈립니다. 일부 전략은 상승을, 일부 전략은 하락을 보며 확신도를 낮춰야 합니다.",
+            "id": "Arah strategi berbeda: beberapa strategi bullish dan lainnya bearish, sehingga tingkat keyakinan perlu dikurangi.",
         },
         "wide_score_dispersion": {
             "zh": "策略信号分数分布较宽，说明多策略对行情结构存在明显分歧。",
             "en": "Strategy signal scores are widely dispersed, indicating meaningful disagreement on market structure.",
             "ko": "전략 신호 점수 분포가 넓어 시장 구조에 대한 전략 간 이견이 큽니다.",
+            "id": "Skor sinyal strategi tersebar luas, menunjukkan perbedaan pandangan yang berarti terhadap struktur pasar.",
         },
         "high_confidence_dissent": {
             "zh": "存在高置信少数派策略与综合信号明显不一致，应保留反方观点。",
             "en": "A high-confidence minority strategy materially disagrees with the final signal and should be kept as a dissenting view.",
             "ko": "높은 확신도의 소수 전략이 종합 신호와 크게 달라 반대 관점으로 보존해야 합니다.",
+            "id": "Strategi minoritas dengan tingkat keyakinan tinggi berbeda nyata dari sinyal akhir dan perlu dipertimbangkan sebagai pandangan alternatif.",
         },
         "adjustment_contradiction": {
             "zh": "策略加减分方向相互矛盾，说明不同策略对同一标的的边际评分分歧较大。",
             "en": "Strategy score adjustments contradict each other, showing large disagreement in marginal scoring.",
             "ko": "전략별 점수 조정 방향이 서로 충돌해 동일 종목의 한계 평가 차이가 큽니다.",
+            "id": "Penyesuaian skor antarstrategi saling bertentangan, menunjukkan perbedaan penilaian yang besar.",
         },
     }
     localized = translations.get(key, {})
@@ -1186,6 +1381,16 @@ def localize_strategy_synthesis_summary(strategy_synthesis: Any, language: Optio
         else:
             base = f"{opinion_count}개 전략의 종합 판단: 종합 신호는 {final_signal}, 공감도는 {consensus_level}, 감지된 전략 충돌은 없습니다."
         return base
+    if lang == "id":
+        if conflict_count:
+            return (
+                f"Rangkuman dari {opinion_count} strategi: sinyal akhir {final_signal}, "
+                f"konsensus {consensus_level}, tingkat konflik {conflict_severity}."
+            )
+        return (
+            f"Rangkuman dari {opinion_count} strategi: sinyal akhir {final_signal}, "
+            f"konsensus {consensus_level}, tanpa konflik yang terdeteksi."
+        )
     if conflict_count:
         base = f"来自 {opinion_count} 个策略的综合判断：综合信号为{final_signal}，共识度为{consensus_level}，冲突强度为{conflict_severity}。"
     else:

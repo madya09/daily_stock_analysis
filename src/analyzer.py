@@ -124,13 +124,15 @@ def _describe_llm_result_model(
     return actual_model
 
 
-def _localized_text(language: Any, *, en: str, zh: str, ko: str) -> str:
-    """Pick a deterministic fallback string for the report language (zh/en/ko)."""
+def _localized_text(language: Any, *, en: str, zh: str, ko: str, id: Optional[str] = None) -> str:
+    """Pick a deterministic fallback string for the report language."""
     normalized = normalize_report_language(language)
     if normalized == "en":
         return en
     if normalized == "ko":
         return ko
+    if normalized == "id":
+        return id or en
     return zh
 
 
@@ -206,7 +208,7 @@ _QUOTE_LABELS_EN = {
 def _phase_aware_quote_labels(context: Dict[str, Any], report_language: str = "zh") -> Tuple[str, str]:
     """Choose quote-table labels that do not conflict with phase context."""
     section_title, close_label = _phase_aware_quote_labels_zh(context)
-    if normalize_report_language(report_language) in ("en", "ko"):
+    if normalize_report_language(report_language) in ("en", "ko", "id"):
         return _QUOTE_LABELS_EN[section_title], _QUOTE_LABELS_EN[close_label]
     return section_title, close_label
 
@@ -285,11 +287,11 @@ def _legacy_audit_marker_specs(
     add("stock_code", code)
     add("stock_name", stock_name)
     add("analysis_date", context.get("date"))
-    add("market_phase", "## Market Phase Context" if report_language in ("en", "ko") else "## 市场阶段上下文")
-    add("daily_market_context", "## Daily Market Context" if report_language in ("en", "ko") else "## 大盘环境摘要")
-    add("market_structure_context", "## Market Structure Context" if report_language in ("en", "ko") else "## 市场结构上下文")
+    add("market_phase", "## Market Phase Context" if report_language in ("en", "ko", "id") else "## 市场阶段上下文")
+    add("daily_market_context", "## Daily Market Context" if report_language in ("en", "ko", "id") else "## 大盘环境摘要")
+    add("market_structure_context", "## Market Structure Context" if report_language in ("en", "ko", "id") else "## 市场结构上下文")
     add("analysis_context_pack", analysis_context_pack_summary)
-    english = report_language in ("en", "ko")
+    english = report_language in ("en", "ko", "id")
     add("quote", "## 📈 Technical Data" if english else "## 📈 技术面数据")
     news_marker = "## 📰 News Intelligence" if english else "## 📰 舆情情报"
     add("news_context", news_marker if news_context else None)
@@ -447,24 +449,28 @@ def apply_placeholder_fill(result: "AnalysisResult", missing_fields: List[str]) 
             en="Model did not provide a phase action window",
             zh="模型未提供阶段化行动窗口",
             ko="모델이 단계별 행동 구간을 제공하지 않았습니다",
+            id="Model tidak memberikan rentang waktu tindakan sesuai fase",
         ),
         "dashboard.phase_decision.immediate_action": _localized_text(
             report_language,
             en="Model did not provide a phase-aware immediate action",
             zh="模型未提供阶段化即时动作",
             ko="모델이 단계 인식 즉시 동작을 제공하지 않았습니다",
+            id="Model tidak memberikan tindakan langsung sesuai fase",
         ),
         "dashboard.phase_decision.next_check_time": _localized_text(
             report_language,
             en="Model did not provide a next check point",
             zh="模型未提供下一次检查点",
             ko="모델이 다음 점검 시점을 제공하지 않았습니다",
+            id="Model tidak memberikan waktu pemeriksaan berikutnya",
         ),
         "dashboard.phase_decision.confidence_reason": _localized_text(
             report_language,
             en="Model did not provide a phase confidence rationale",
             zh="模型未提供阶段化置信度理由",
             ko="모델이 단계별 신뢰도 근거를 제공하지 않았습니다",
+            id="Model tidak memberikan alasan tingkat keyakinan sesuai fase",
         ),
     }
     for field in missing_fields:
@@ -829,7 +835,7 @@ def _sanitize_trend_analysis_for_prompt(
     language: str = "zh",
 ) -> Dict[str, Any]:
     """Clean prompt-only trend hints on a derived copy without touching runtime/provider config."""
-    english = normalize_report_language(language) in ("en", "ko")
+    english = normalize_report_language(language) in ("en", "ko", "id")
     trend_dict = dict(trend) if isinstance(trend, dict) else {}
     signal_reasons = _normalize_prompt_reason_items(trend_dict.get("signal_reasons"))
     risk_factors = _normalize_prompt_reason_items(trend_dict.get("risk_factors"))
@@ -2688,7 +2694,7 @@ Output strictly in the following JSON format. This is a complete Decision Dashbo
         skill_instructions, default_skill_policy, use_legacy_default_prompt = self._get_skill_prompt_sections()
         # Korean reuses the English scaffolding (same as market review / context pack);
         # the Korean output directive is appended below.
-        use_english_template = lang in ("en", "ko")
+        use_english_template = lang in ("en", "ko", "id")
         if use_legacy_default_prompt:
             legacy_template = (
                 self.LEGACY_DEFAULT_SYSTEM_PROMPT_EN if use_english_template else self.LEGACY_DEFAULT_SYSTEM_PROMPT
@@ -2736,6 +2742,17 @@ Output strictly in the following JSON format. This is a complete Decision Dashbo
 - All human-readable JSON values must be written in Korean (한국어).
 - Use the common Korean or original listed company name when confident; do not invent one.
 - This includes `stock_name`, `trend_prediction`, `operation_advice`, `confidence_level`, nested dashboard text, checklist items, and all narrative summaries.
+"""
+        if lang == "id":
+            return base_prompt + """
+
+## Bahasa Output (prioritas tertinggi)
+
+- Pertahankan semua nama kunci JSON tanpa perubahan.
+- `decision_type` harus tetap `buy|hold|sell`.
+- Semua nilai teks yang dapat dibaca pengguna harus ditulis dalam Bahasa Indonesia.
+- Gunakan nama perusahaan yang umum dalam Bahasa Indonesia jika yakin; jika tidak, pertahankan nama resmi yang tercatat dan jangan mengarang nama.
+- Ketentuan ini mencakup `stock_name`, `trend_prediction`, `operation_advice`, `confidence_level`, seluruh teks dashboard bertingkat, item daftar periksa, dan semua ringkasan naratif.
 """
         return base_prompt + """
 
@@ -4095,6 +4112,15 @@ Output strictly in the following JSON format. This is a complete Decision Dashbo
                     f"Check {field}={requested_backend} ({reason}) or set a valid "
                     "backend/fallback before retrying."
                 )
+            elif report_language == "id":
+                summary = (
+                    "Analisis AI tidak tersedia karena backend generasi "
+                    f"tidak dapat dijalankan: {backend_error.error_code.value}."
+                )
+                risk_warning = (
+                    f"Periksa {field}={requested_backend} ({reason}) atau atur "
+                    "backend/fallback yang valid sebelum mencoba lagi."
+                )
             elif report_language == "ko":
                 summary = (
                     "생성 백엔드를 시작할 수 없어 AI 분석을 사용할 수 없습니다: "
@@ -4144,12 +4170,14 @@ Output strictly in the following JSON format. This is a complete Decision Dashbo
                     en='AI analysis is unavailable because no API key is configured.',
                     zh='AI 分析功能未启用（未配置 API Key）',
                     ko='API 키가 설정되지 않아 AI 분석을 사용할 수 없습니다.',
+                    id='Analisis AI tidak tersedia karena API key belum dikonfigurasi.',
                 ),
                 risk_warning=_localized_text(
                     report_language,
                     en='Configure an LLM API key (GEMINI_API_KEY/ANTHROPIC_API_KEY/OPENAI_API_KEY) and retry.',
                     zh='请配置 LLM API Key（GEMINI_API_KEY/ANTHROPIC_API_KEY/OPENAI_API_KEY）后重试',
                     ko='LLM API 키(GEMINI_API_KEY/ANTHROPIC_API_KEY/OPENAI_API_KEY)를 설정한 뒤 다시 시도하세요.',
+                    id='Atur API key LLM (GEMINI_API_KEY/ANTHROPIC_API_KEY/OPENAI_API_KEY), lalu coba lagi.',
                 ),
                 success=False,
                 error_message=_localized_text(
@@ -4157,6 +4185,7 @@ Output strictly in the following JSON format. This is a complete Decision Dashbo
                     en='LLM API key is not configured',
                     zh='LLM API Key 未配置',
                     ko='LLM API 키가 설정되지 않았습니다',
+                    id='API key LLM belum dikonfigurasi',
                 ),
                 model_used=None,
                 report_language=report_language,
@@ -4337,12 +4366,14 @@ Output strictly in the following JSON format. This is a complete Decision Dashbo
                     en=f'Analysis failed: {safe_error[:100]}',
                     zh=f'分析过程出错: {safe_error[:100]}',
                     ko=f'분석 중 오류가 발생했습니다: {safe_error[:100]}',
+                    id=f'Analisis gagal: {safe_error[:100]}',
                 ),
                 risk_warning=_localized_text(
                     report_language,
                     en='Analysis failed. Please retry later or review manually.',
                     zh='分析失败，请稍后重试或手动分析',
                     ko='분석에 실패했습니다. 잠시 후 다시 시도하거나 수동으로 검토하세요.',
+                    id='Analisis gagal. Coba lagi nanti atau lakukan pemeriksaan manual.',
                 ),
                 success=False,
                 error_message=safe_error,
@@ -4372,7 +4403,7 @@ Output strictly in the following JSON format. This is a complete Decision Dashbo
         report_language = normalize_report_language(report_language)
         # Structural template language: Korean reuses the English scaffolding and only
         # the final output-language directive differs (#2352).
-        english = report_language in ("en", "ko")
+        english = report_language in ("en", "ko", "id")
         _, _, use_legacy_default_prompt = self._get_skill_prompt_sections()
         
         # 优先使用上下文中的股票名称（从 realtime_quote 获取）
@@ -4743,7 +4774,7 @@ Output strictly in the following JSON format. This is a complete Decision Dashbo
             chip_instruction = (
                 "Do not fabricate profit ratio, average cost, or concentration. Mention chip data "
                 "unavailability only once in the report; do not repeat per-field no-data text in `chip_structure`."
-                if report_language in ("en", "ko")
+                if report_language in ("en", "ko", "id")
                 else "请勿编造获利比例、平均成本或集中度；报告中只说明一次筹码数据不可用，不要把“数据缺失，无法判断”逐字段重复写入 `chip_structure`。"
             )
             chip_section_title = (
@@ -5071,7 +5102,7 @@ If the stock name shown above is "Stock {code}" or incorrect, **state the correc
 4. ❓ 消息面有无重大利空或与技能结论冲突的信息？
 5. ❓ 若结论成立，具体触发条件、止损位、观察点分别是什么？
 """
-        if english:
+        if english and report_language != "id":
             prompt += f"""
 
 ### Decision Dashboard requirements:
@@ -5084,6 +5115,19 @@ If the stock name shown above is "Stock {code}" or incorrect, **state the correc
 - **Technical consistency**: never use mutually exclusive conclusions such as "bearish alignment" and "bullish alignment" as valid evidence at the same time; if fundamentals/events conflict with technicals, state explicitly "event-led, technicals not yet confirmed" or "fundamentals lean positive, but technicals are not yet confirmed"
 
 Output the complete Decision Dashboard in JSON format."""
+        elif report_language == "id":
+            prompt += f"""
+
+### Persyaratan Dasbor Keputusan
+- **Nama saham**: gunakan nama resmi saham yang tercatat; jangan mengarang nama.
+- **Kesimpulan utama**: jelaskan secara singkat apakah tindakan yang disarankan adalah membeli, menjual, atau menunggu.
+- **Saran posisi**: bedakan saran bagi yang belum memiliki saham dan yang sudah memilikinya.
+- **Level harga**: berikan harga masuk, batas kerugian, dan target yang konkret jika datanya tersedia.
+- **Daftar periksa**: tandai setiap item dengan ✅/⚠️/❌.
+- **Kebaruan berita**: `latest_news`, `risk_alerts`, dan `positive_catalysts` tidak boleh memuat informasi yang lebih lama dari {news_window_days} hari atau bertanggal tidak diketahui.
+- **Konsistensi teknikal**: jangan menggunakan kesimpulan yang saling bertentangan sebagai bukti secara bersamaan. Jika fundamental/peristiwa berbeda dari teknikal, nyatakan konflik tersebut dengan jelas.
+
+Keluarkan seluruh Dasbor Keputusan dalam format JSON."""
         else:
             prompt += f"""
 
@@ -5120,6 +5164,16 @@ Output the complete Decision Dashboard in JSON format."""
 - Use the common Korean or original listed company name when you are confident. If not, keep the listed company name rather than inventing one.
 - When data is missing, explain it in Korean instead of Chinese.
 """
+        elif report_language == "id":
+            prompt += """
+
+### Persyaratan bahasa output (prioritas tertinggi)
+- Pertahankan semua nama kunci JSON seperti yang ditentukan di atas; jangan menerjemahkan nama kunci.
+- `decision_type` harus tetap `buy`, `hold`, atau `sell`.
+- Semua nilai teks yang dapat dibaca pengguna harus ditulis dalam Bahasa Indonesia.
+- Ini mencakup `stock_name`, `trend_prediction`, `operation_advice`, `confidence_level`, semua teks dashboard bertingkat, item daftar periksa, dan setiap ringkasan.
+- Jika data tidak tersedia, jelaskan dalam Bahasa Indonesia.
+"""
         else:
             prompt += f"""
 
@@ -5136,7 +5190,7 @@ Output the complete Decision Dashboard in JSON format."""
         """格式化成交量显示"""
         if volume is None:
             return 'N/A'
-        if normalize_report_language(report_language) in ("en", "ko"):
+        if normalize_report_language(report_language) in ("en", "ko", "id"):
             return f"{self._format_scaled_number_en(volume)} shares"
         if volume >= 1e8:
             return f"{volume / 1e8:.2f} 亿股"
@@ -5149,7 +5203,7 @@ Output the complete Decision Dashboard in JSON format."""
         """格式化成交额显示"""
         if amount is None:
             return 'N/A'
-        if normalize_report_language(report_language) in ("en", "ko"):
+        if normalize_report_language(report_language) in ("en", "ko", "id"):
             return self._format_scaled_number_en(amount)
         if amount >= 1e8:
             return f"{amount / 1e8:.2f} 亿元"
@@ -5247,7 +5301,7 @@ Output the complete Decision Dashboard in JSON format."""
     def _build_integrity_complement_prompt(self, missing_fields: List[str], report_language: str = "zh") -> str:
         """Build complement instruction for missing mandatory fields."""
         report_language = normalize_report_language(report_language)
-        if report_language in ("en", "ko"):
+        if report_language in ("en", "ko", "id"):
             lines = ["### Completion requirements: fill the missing mandatory fields below and output the full JSON again:"]
             for f in missing_fields:
                 if f == "sentiment_score":
@@ -5318,7 +5372,7 @@ Output the complete Decision Dashboard in JSON format."""
         """Build retry prompt using the previous response as the complement baseline."""
         complement = self._build_integrity_complement_prompt(missing_fields, report_language=report_language)
         previous_output = previous_response.strip()
-        if normalize_report_language(report_language) in ("en", "ko"):
+        if normalize_report_language(report_language) in ("en", "ko", "id"):
             prefix = "### The previous output is below. Complete the missing fields based on that output and return the full JSON again. Do not omit existing fields:"
         else:
             prefix = "### 上一次输出如下，请在该输出基础上补齐缺失字段，并重新输出完整 JSON。不要省略已有字段："
@@ -5549,14 +5603,14 @@ Output the complete Decision Dashboard in JSON format."""
                 hot_topics=data.get('hot_topics', ''),
                 # 综合
                 analysis_summary=data.get('analysis_summary', _localized_text(
-                    report_language, en='Analysis completed', zh='分析完成', ko='분석 완료')),
+                    report_language, en='Analysis completed', zh='分析完成', ko='분석 완료', id='Analisis selesai')),
                 key_points=data.get('key_points', ''),
                 risk_warning=data.get('risk_warning', ''),
                 buy_reason=data.get('buy_reason', ''),
                 # 元数据
                 search_performed=data.get('search_performed', False),
                 data_sources=data.get('data_sources', _localized_text(
-                    report_language, en='Technical data', zh='技术面数据', ko='기술적 데이터')),
+                    report_language, en='Technical data', zh='技术面数据', ko='기술적 데이터', id='Data teknikal')),
                 success=True,
             )
             return populate_decision_action_fields(
@@ -5668,7 +5722,7 @@ Output the complete Decision Dashboard in JSON format."""
         
         # 截取前500字符作为摘要
         summary = response_text[:500] if response_text else _localized_text(
-            report_language, en='No analysis result', zh='无分析结果', ko='분석 결과 없음')
+            report_language, en='No analysis result', zh='无分析结果', ko='분석 결과 없음', id='Tidak ada hasil analisis')
         
         result = AnalysisResult(
             code=code,
@@ -5684,12 +5738,14 @@ Output the complete Decision Dashboard in JSON format."""
                 en='JSON parsing failed; treat this as best-effort output.',
                 zh='JSON解析失败，仅供参考',
                 ko='JSON 파싱에 실패했습니다. 참고용으로만 사용하세요.',
+                id='Penguraian JSON gagal; hasil ini hanya perkiraan dan perlu diverifikasi.',
             ),
             risk_warning=_localized_text(
                 report_language,
                 en='The result may be inaccurate. Cross-check with other information.',
                 zh='分析结果可能不准确，建议结合其他信息判断',
                 ko='결과가 부정확할 수 있습니다. 다른 정보와 교차 확인하세요.',
+                id='Hasil analisis mungkin tidak akurat. Periksa kembali dengan informasi lain.',
             ),
             raw_response=response_text,
             success=False,

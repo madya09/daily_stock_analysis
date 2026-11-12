@@ -41,11 +41,18 @@ _KO_ZERO_RESULTS = (
     "⚠️ 이번 분석에서 사용 가능한 뉴스 데이터를 가져오지 못해 "
     "아래 결론에는 뉴스 근거를 반영하지 않았습니다."
 )
+_ID_NOT_CONFIGURED = (
+    "⚠️ Kanal pencarian berita belum dikonfigurasi; analisis ini tidak menggunakan bukti dari berita."
+)
+_ID_ZERO_RESULTS = (
+    "⚠️ Data berita yang dapat digunakan tidak berhasil diperoleh; kesimpulan berikut tidak menggunakan bukti dari berita."
+)
 
 _DISCLOSURES = {
     "zh": (_ZH_NOT_CONFIGURED, _ZH_ZERO_RESULTS),
     "en": (_EN_NOT_CONFIGURED, _EN_ZERO_RESULTS),
     "ko": (_KO_NOT_CONFIGURED, _KO_ZERO_RESULTS),
+    "id": (_ID_NOT_CONFIGURED, _ID_ZERO_RESULTS),
 }
 
 if set(_DISCLOSURES) != set(SUPPORTED_REPORT_LANGUAGES):

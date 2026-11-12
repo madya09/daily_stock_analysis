@@ -191,6 +191,19 @@ class EnglishStockPromptTemplateTestCase(unittest.TestCase):
         ko_headers = re.findall(r"^#{1,4} .+$", ko_user, re.MULTILINE)
         self.assertEqual(ko_headers, en_headers)
 
+    def test_indonesian_uses_english_scaffolding_and_indonesian_directives(self) -> None:
+        analyzer = _make_analyzer(legacy=True)
+        fake_cfg = SimpleNamespace(news_max_age_days=3, news_strategy_profile="short")
+        with patch("src.analyzer.get_config", return_value=fake_cfg):
+            user_prompt = analyzer._format_prompt(
+                copy.deepcopy(_rich_context()), "Apple", report_language="id"
+            )
+        system_prompt = analyzer._get_analysis_system_prompt("id", stock_code="AAPL")
+
+        self.assertIn("# Decision Dashboard Analysis Request", user_prompt)
+        self.assertIn("Semua nilai teks yang dapat dibaca pengguna harus ditulis dalam Bahasa Indonesia.", system_prompt)
+        self.assertIn("Semua nilai teks yang dapat dibaca pengguna harus ditulis dalam Bahasa Indonesia.", user_prompt)
+
     def test_chinese_prompt_keeps_chinese_template(self) -> None:
         analyzer = _make_analyzer(legacy=True)
         fake_cfg = SimpleNamespace(news_max_age_days=3, news_strategy_profile="short")
