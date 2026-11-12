@@ -33,7 +33,7 @@ class _ProviderDefinition:
             for markets in self.dataset_markets.values()
             for market in markets
         }
-        preferred_order = ("cn", "hk", "us", "jp", "kr", "tw")
+        preferred_order = ("cn", "hk", "us", "jp", "kr", "tw", "id")
         return tuple(market for market in preferred_order if market in supported)
 
 
@@ -77,11 +77,11 @@ _PROVIDER_DEFINITIONS: Sequence[_ProviderDefinition] = (
         label="YFinance",
         fetcher_name="YfinanceFetcher",
         dataset_markets={
-            "quote.realtime": ("hk", "us", "jp", "kr", "tw"),
-            "kline.daily": ("cn", "hk", "us", "jp", "kr", "tw"),
+            "quote.realtime": ("hk", "us", "jp", "kr", "tw", "id"),
+            "kline.daily": ("cn", "hk", "us", "jp", "kr", "tw", "id"),
             "index.daily": ("cn", "us"),
             "market.overview": ("cn", "hk", "us", "jp", "kr", "tw"),
-            "financial.snapshot": ("hk", "us", "jp", "kr", "tw"),
+            "financial.snapshot": ("hk", "us", "jp", "kr", "tw", "id"),
         },
         builtin=True,
     ),
@@ -626,7 +626,7 @@ class DataCapabilityService:
             },
             **{
                 market: generic_market_priority(market)
-                for market in ("jp", "kr", "tw")
+                for market in ("jp", "kr", "tw", "id")
             },
         }
 
@@ -643,7 +643,7 @@ class DataCapabilityService:
                 market=market,
                 warnings=warnings,
             )
-            for market in ("cn", "hk", "us", "jp", "kr", "tw")
+            for market in ("cn", "hk", "us", "jp", "kr", "tw", "id")
         }
 
     def _daily_status_resolvers(

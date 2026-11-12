@@ -94,6 +94,11 @@ class YfinanceFetcher(BaseFetcher):
         """
         return is_suffix_market_symbol(stock_code, "tw")
 
+    @staticmethod
+    def _is_id_suffix_stock(stock_code: str) -> bool:
+        """Return True for Indonesia Stock Exchange Yahoo symbols such as BBCA.JK."""
+        return is_suffix_market_symbol(stock_code, "id")
+
     def _convert_stock_code(self, stock_code: str) -> str:
         """
         转换股票代码为 Yahoo Finance 格式
@@ -131,9 +136,13 @@ class YfinanceFetcher(BaseFetcher):
             logger.debug(f"识别为美股代码: {code}")
             return code
 
-        # 日股/韩股/台股 MVP：显式 Yahoo Finance suffix-only 代码，原样传给 Yahoo。
-        if self._is_jp_kr_suffix_stock(code) or self._is_tw_suffix_stock(code):
-            logger.debug(f"识别为日韩台 Yahoo suffix 代码: {code}")
+        # Offshore market symbols use explicit Yahoo Finance suffixes.
+        if (
+            self._is_jp_kr_suffix_stock(code)
+            or self._is_tw_suffix_stock(code)
+            or self._is_id_suffix_stock(code)
+        ):
+            logger.debug(f"识别为海外市场 Yahoo suffix 代码: {code}")
             return code
 
         # 港股：hk前缀 -> .HK后缀
@@ -815,14 +824,15 @@ class YfinanceFetcher(BaseFetcher):
                 index_name=index_name,
             )
 
-        # 仅处理美股、港股或 JP/KR/TW suffix-only 股票
+        # 仅处理美股、港股或 suffix-only 海外市场股票
         if not (
             self._is_us_stock(stock_code)
             or _is_hk_market(stock_code)
             or self._is_jp_kr_suffix_stock(stock_code)
             or self._is_tw_suffix_stock(stock_code)
+            or self._is_id_suffix_stock(stock_code)
         ):
-            logger.debug(f"[Yfinance] {stock_code} 不是支持的美股、港股或日韩台代码，跳过")
+            logger.debug(f"[Yfinance] {stock_code} 不是支持的海外市场代码，跳过")
             return None
 
         try:

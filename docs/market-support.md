@@ -1,5 +1,13 @@
 # 市场支持与边界
 
+## 印度尼西亚 IDX 个股（suffix-only）
+
+当前支持显式 Yahoo Finance 股票代码（如 `BBCA.JK`）进入个股分析、日线/实时行情、基础报告和 DecisionSignal API 路径。数据只走 YFinance；A 股专属资金流、龙虎榜和板块数据不适用于该市场。交易日历使用 `XIDX / Asia/Jakarta`；项目依赖 `exchange-calendars>=4.13.0`，并已在 4.13.2 验证 `XIDX` 可用。若部署缺少该可选依赖或日历加载失败，仍按现有 fail-open 行为处理，不能据此保证节假日过滤。
+
+配置 `IDX_SHARIA_STOCKS_SHEET_URL` 后，应用读取公开 Google 表格 CSV，要求有 `Kode Saham` 和 `ISSI` 列，仅把 `ISSI=Ya` 的代码转换为 `.JK` ticker；该变量优先于 `STOCK_LIST`。当前提供的表格是用户选择的运行清单，未核实为 OJK 官方 DES feed，变更或撤销表格访问权限由用户负责。在线读取失败时使用上次有效快照；快照缺失或损坏时显式终止本轮，绝不回退到未筛选的自选列表。
+
+不承诺 Yahoo 行情时效、完整基本面、IDX 大盘复盘、Market Light、行业数据或完整 IDR Portfolio 估值；自动补全索引也未包含完整 IDX 股票池，请使用该表格生成的清单或手动输入 `.JK` 代码。
+
 ## 日本/韩国个股 suffix-only MVP（Issue #1718，Refs #1718）
 
 当前阶段支持手动输入日本、韩国股票的 Yahoo Finance 后缀代码，进入既有个股分析、历史保存和基础报告展示链路。Web 自动补全内置一批常用日股/韩股种子索引，支持按 suffix 代码、中英文名称或常用别名搜索。

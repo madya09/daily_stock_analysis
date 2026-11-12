@@ -8,6 +8,7 @@ without introducing import cycles.
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from typing import Optional
 
@@ -19,11 +20,13 @@ class SuffixMarketSpec:
     market: str
     suffixes: tuple[str, ...]
     digit_lengths: tuple[int, ...]
+    base_pattern: Optional[str] = None
 
 
 _SUFFIX_MARKET_SPECS: tuple[SuffixMarketSpec, ...] = (
     SuffixMarketSpec("jp", ("T",), (4, 5)),
     SuffixMarketSpec("kr", ("KS", "KQ"), (6,)),
+    SuffixMarketSpec("id", ("JK",), (), r"[A-Z0-9]{2,5}"),
     # Taiwan support mirrors the same suffix-only pattern; keep it here so the
     # shared helpers stay complete for all yfinance-only offshore markets.
     SuffixMarketSpec("tw", ("TW", "TWO"), (4, 5, 6)),
@@ -50,7 +53,7 @@ def split_suffix_symbol(stock_code: str) -> tuple[str, str] | None:
 
 
 def get_suffix_market(stock_code: str) -> Optional[str]:
-    """Return jp/kr/tw for supported suffix-only Yahoo symbols, else None."""
+    """Return the market for supported suffix-only Yahoo symbols, else None."""
 
     parts = split_suffix_symbol(stock_code)
     if parts is None:
@@ -59,6 +62,8 @@ def get_suffix_market(stock_code: str) -> Optional[str]:
     spec = _SUFFIX_TO_SPEC.get(suffix)
     if spec is None:
         return None
+    if spec.base_pattern is not None:
+        return spec.market if re.fullmatch(spec.base_pattern, base) else None
     if not (base.isdigit() and len(base) in spec.digit_lengths):
         return None
     return spec.market

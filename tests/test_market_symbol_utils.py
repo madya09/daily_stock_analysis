@@ -15,10 +15,12 @@ def test_suffix_market_detection_covers_supported_yahoo_markets() -> None:
     assert get_suffix_market("035720.kq") == "kr"
     assert get_suffix_market("2330.tw") == "tw"
     assert get_suffix_market("6505.two") == "tw"
+    assert get_suffix_market("bbca.jk") == "id"
 
     assert is_suffix_market_symbol("7203.T", "jp") is True
     assert is_suffix_market_symbol("7203.T", "kr") is False
     assert normalize_suffix_market_symbol("005930.ks") == "005930.KS"
+    assert normalize_suffix_market_symbol("bbca.jk") == "BBCA.JK"
 
 
 def test_suffix_market_detection_rejects_ambiguous_or_invalid_bare_codes() -> None:
@@ -27,6 +29,7 @@ def test_suffix_market_detection_rejects_ambiguous_or_invalid_bare_codes() -> No
     assert get_suffix_market("123.T") is None
     assert get_suffix_market("1234567.TW") is None
     assert get_suffix_market("7203.KS") is None
+    assert get_suffix_market("INVALID.JK") is None
 
 
 def test_bare_base_lookup_is_only_allowed_for_jp_kr_mvp() -> None:

@@ -158,6 +158,7 @@ daily_stock_analysis/
 | Secret 名称 | 说明 | 必填 |
 |------------|------|:----:|
 | `STOCK_LIST` | 自选股代码，如 `600519,300750,002594,7203.T,005930.KS`；推荐使用英文逗号，中文逗号、顿号、分号、空格和换行会被识别并规范为英文逗号 | ✅ |
+| `IDX_SHARIA_STOCKS_SHEET_URL` | 可选的公开 Google 表格 URL；配置后只分析 `ISSI` 列为 `Ya` 的代码并自动补 `.JK`，优先于 `STOCK_LIST` | 可选 |
 | `SERPAPI_API_KEYS` | [SerpAPI](https://serpapi.com/github-daily-stock-analysis) 搜索引擎结果补强，适合实时金融新闻 | 推荐 |
 | `ANSPIRE_API_KEYS` | [Anspire](https://open.anspire.cn/dsa?share_code=QFBC0FYC) API Key（可选，模型与搜索共用；可用性以账号权限为准） | 可选 |
 | `TAVILY_API_KEYS` | [Tavily](https://tavily.com/) 搜索 API（新闻搜索） | 可选 |
@@ -1196,6 +1197,9 @@ FEISHU_WEBHOOK_URL=https://open.feishu.cn/open-apis/bot/v2/hook/your_hook_token
 3. 获取 Chat ID（可通过 @userinfobot）
 4. 设置 `TELEGRAM_BOT_TOKEN` 和 `TELEGRAM_CHAT_ID`
 5. (可选) 如需发送到 Topic，设置 `TELEGRAM_MESSAGE_THREAD_ID` (从 Topic 链接末尾获取)
+6. (可选) 设置 `NOTIFICATION_REPORT_CHANNELS=telegram`，将报告通知限制为 Telegram
+
+IDX 股票使用 `.JK` 后缀并由现有 YFinance 日线/行情路径获取。设置 `IDX_SHARIA_STOCKS_SHEET_URL` 后，应用会将 Google 表格导出为 CSV，要求包含 `Kode Saham` 与 `ISSI` 两列，只纳入 `ISSI=Ya` 的行。示例表格来自用户配置；系统不将其标记为已核实的 OJK 官方 DES 数据。网络更新失败时只用上次成功验证的本地缓存；没有有效缓存则停止本轮分析，不回退到可能含非 syariah 股票的 `STOCK_LIST`。行情与基本面覆盖取决于 YFinance 可用性，IDX 大盘复盘和完整 Portfolio 估值不在本次支持范围内。
 
 ### 邮件
 

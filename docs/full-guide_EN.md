@@ -151,6 +151,7 @@ Go to your forked repo → `Settings` → `Secrets and variables` → `Actions` 
 | Secret Name | Description | Required |
 |------------|------|:----:|
 | `STOCK_LIST` | Watchlist codes, e.g., `600519,300750,002594,7203.T,005930.KS`; English commas are recommended, while pasted Chinese commas, enumeration commas, semicolons, spaces, and newlines are recognized and normalized to English commas | ✅ |
+| `IDX_SHARIA_STOCKS_SHEET_URL` | Optional public Google Sheets URL; when set, analyzes only rows with `ISSI=Ya`, appends `.JK`, and takes precedence over `STOCK_LIST` | Optional |
 | `SERPAPI_API_KEYS` | [SerpAPI](https://serpapi.com/github-daily-stock-analysis) search-engine results for realtime financial news | Recommended |
 | `ANSPIRE_API_KEYS` | [Anspire](https://open.anspire.cn/dsa?share_code=QFBC0FYC) API key (optional; shared by LLM and search; availability depends on account permissions) | Optional |
 | `TAVILY_API_KEYS` | [Tavily](https://tavily.com/) Search API (for news search) | Optional |
@@ -1059,6 +1060,9 @@ For a full illustrated troubleshooting guide, see [docs/bot/feishu-bot-config.md
 3. Get Chat ID (via @userinfobot)
 4. Set `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`
 5. (Optional) To send to Topic, set `TELEGRAM_MESSAGE_THREAD_ID` (get from Topic link)
+6. (Optional) Set `NOTIFICATION_REPORT_CHANNELS=telegram` to route report notifications only to Telegram
+
+IDX stocks use the `.JK` suffix and the existing YFinance daily-data/quote path. When `IDX_SHARIA_STOCKS_SHEET_URL` is set, the app exports the Google Sheet as CSV and requires `Kode Saham` and `ISSI` columns; only rows with `ISSI=Ya` are included. The example sheet is user-configured and is not represented as a verified official OJK DES feed. If a refresh fails, only the last successfully validated local snapshot is used; without a valid snapshot, that analysis run stops rather than falling back to an unfiltered `STOCK_LIST`. Quote and fundamentals coverage depends on YFinance availability. IDX market review and full portfolio valuation are outside this support scope.
 
 ### Email
 

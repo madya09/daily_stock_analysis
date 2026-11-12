@@ -259,7 +259,7 @@ def test_realtime_dataset_quality_is_market_aware() -> None:
     assert quote_quality["coverage"]["markets"]["cn"]["source"] == "efinance"
     assert quote_quality["coverage"]["markets"]["hk"]["status"] == "unavailable"
     assert quote_quality["coverage"]["markets"]["us"]["status"] == "ok"
-    for market in ("jp", "kr", "tw"):
+    for market in ("jp", "kr", "tw", "id"):
         assert quote_quality["coverage"]["markets"][market] == {
             "status": "ok",
             "source": "yfinance",
@@ -503,7 +503,7 @@ def test_daily_dataset_quality_is_market_aware() -> None:
     assert daily_quality["coverage"]["markets"]["cn"]["source"] == "efinance"
     assert daily_quality["coverage"]["markets"]["hk"]["status"] == "unavailable"
     assert daily_quality["coverage"]["markets"]["us"]["status"] == "unavailable"
-    for market in ("jp", "kr", "tw"):
+    for market in ("jp", "kr", "tw", "id"):
         assert daily_quality["coverage"]["markets"][market]["status"] == "unavailable"
     assert "hk:request_available_priority_empty" in daily_quality["warnings"]
     assert "us:request_available_priority_empty" in daily_quality["warnings"]
@@ -706,7 +706,7 @@ def test_fundamental_dataset_quality_is_market_aware() -> None:
     assert fundamental_quality["coverage"]["markets"]["hk"]["source"] is None
     assert fundamental_quality["coverage"]["markets"]["us"]["status"] == "unavailable"
     assert fundamental_quality["coverage"]["markets"]["us"]["source"] is None
-    for market in ("jp", "kr", "tw"):
+    for market in ("jp", "kr", "tw", "id"):
         assert fundamental_quality["coverage"]["markets"][market]["status"] == "unavailable"
         assert fundamental_quality["coverage"]["markets"][market]["source"] is None
     assert "hk:source_status:yfinance:unavailable" in fundamental_quality["warnings"]

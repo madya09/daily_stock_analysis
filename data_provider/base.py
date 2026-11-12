@@ -201,6 +201,11 @@ def _is_tw_market(code: str) -> bool:
     return is_suffix_market_symbol(code, "tw")
 
 
+def _is_id_market(code: str) -> bool:
+    """判定是否为印尼 IDX Yahoo Finance suffix 代码（如 BBCA.JK）。"""
+    return is_suffix_market_symbol(code, "id")
+
+
 def _is_etf_code(code: str) -> bool:
     """判定 A 股 ETF 基金代码（保守规则）。"""
     normalized = normalize_stock_code(code)
@@ -241,7 +246,7 @@ def _is_meaningful_chip_distribution(chip: Any) -> bool:
 
 
 def _market_tag(code: str) -> str:
-    """返回市场标签: cn/us/hk/jp/kr/tw."""
+    """返回市场标签: cn/us/hk/jp/kr/tw/id."""
     if _is_us_market(code):
         return "us"
     if _is_hk_market(code):
@@ -252,6 +257,8 @@ def _market_tag(code: str) -> str:
         return "kr"
     if _is_tw_market(code):
         return "tw"
+    if _is_id_market(code):
+        return "id"
     return "cn"
 
 
@@ -642,7 +649,7 @@ class DataFetcherManager:
         "MiaoxiangFetcher": set(),
         "PytdxFetcher": {"cn"},
         "BaostockFetcher": {"cn"},
-        "YfinanceFetcher": {"cn", "hk", "us", "jp", "kr", "tw"},
+        "YfinanceFetcher": {"cn", "hk", "us", "jp", "kr", "tw", "id"},
         "LongbridgeFetcher": {"hk", "us"},
         "FutuFetcher": {"hk"},
         "FinnhubFetcher": {"us"},
@@ -4314,7 +4321,7 @@ class DataFetcherManager:
         stock_code = normalize_stock_code(stock_code)
         market = _market_tag(stock_code)
         is_etf = _is_etf_code(stock_code)
-        if market in {"us", "hk", "jp", "kr", "tw"}:
+        if market in {"us", "hk", "jp", "kr", "tw", "id"}:
             return self._build_offshore_fundamental_context(
                 stock_code,
                 market=market,

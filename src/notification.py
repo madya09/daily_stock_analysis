@@ -2178,6 +2178,7 @@ class NotificationService(
         "RMB": "元",
         "CNH": "元",
         "TWD": "新台币",  # 台股 (TWSE/TPEx) 以新台币计价，避免与 A 股「元」(人民币) 混淆
+        "IDR": "印尼卢比",
     }
 
     @classmethod

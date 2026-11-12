@@ -19,7 +19,7 @@ def detect_market(stock_code: Optional[str]) -> str:
     """Detect market from stock code.
 
     Returns:
-        One of 'cn', 'hk', 'us', or 'cn' as fallback.
+        One of the recognized market tags, or 'cn' as fallback.
     """
     if not stock_code:
         return "cn"
@@ -36,8 +36,8 @@ def detect_market(stock_code: Optional[str]) -> str:
     if code.isdigit() and len(code) == 5:
         return "hk"
 
-    # Suffix-only Yahoo symbols for JP/KR/TW. Bare Korean/Taiwan numeric
-    # codes keep existing fallback semantics to avoid cross-market collisions.
+    # Suffix-only Yahoo symbols for JP/KR/TW/IDX. Bare numeric codes keep
+    # existing fallback semantics to avoid cross-market collisions.
     suffix_market = get_suffix_market(code)
     if suffix_market:
         return suffix_market
@@ -77,6 +77,10 @@ _MARKET_ROLES = {
     "tw": {
         "zh": "台股",
         "en": "Taiwan stock",
+    },
+    "id": {
+        "zh": "印尼股",
+        "en": "Indonesian stock",
     },
 }
 
@@ -144,6 +148,18 @@ _MARKET_GUIDELINES = {
             "electronics-foundry supply chain, the three institutional investor groups (foreign / "
             "investment-trust / dealer), margin trading and day trading, and the TWSE/TPEx ±10% daily "
             "price limit; do not apply China A-share-specific concepts such as Northbound flows or Dragon Tiger lists."
+        ),
+    },
+    "id": {
+        "zh": (
+            "- 本次分析对象为 **印尼股**（印度尼西亚证券交易所 IDX 上市股票，Yahoo Finance 后缀为 `.JK`）。\n"
+            "- 请使用印尼卢比（IDR）和印尼市场语境；不要套用 A 股专属的北向资金、龙虎榜等概念。"
+        ),
+        "en": (
+            "- This analysis covers an **Indonesian stock** listed on the Indonesia Stock Exchange (IDX), "
+            "using the Yahoo Finance `.JK` suffix.\n"
+            "- Use Indonesian rupiah (IDR) and local market context; do not apply China A-share-specific "
+            "concepts such as Northbound flows or Dragon Tiger lists."
         ),
     },
 }

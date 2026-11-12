@@ -979,6 +979,7 @@ class Config:
     
     # === 自选股配置 ===
     stock_list: List[str] = field(default_factory=list)
+    idx_sharia_stocks_sheet_url: Optional[str] = None
 
     # === 飞书云文档配置 ===
     feishu_app_id: Optional[str] = None
@@ -1916,6 +1917,9 @@ class Config:
 
         return cls(
             stock_list=stock_list,
+            idx_sharia_stocks_sheet_url=(
+                os.getenv("IDX_SHARIA_STOCKS_SHEET_URL", "").strip() or None
+            ),
             feishu_app_id=os.getenv('FEISHU_APP_ID'),
             feishu_app_secret=os.getenv('FEISHU_APP_SECRET'),
             feishu_folder_token=os.getenv('FEISHU_FOLDER_TOKEN'),
@@ -3222,31 +3226,45 @@ class Config:
 
     def refresh_stock_list(self) -> None:
         """
-        热读取 STOCK_LIST 环境变量并更新配置中的自选股列表
+        热读取股票列表配置并更新当前分析范围。
         
         支持两种配置方式：
         1. .env 文件（本地开发、定时任务模式） - 修改后下次执行自动生效
         2. 系统环境变量（GitHub Actions、Docker） - 启动时固定，运行中不变
+
+        配置了 IDX_SHARIA_STOCKS_SHEET_URL 时，在线表格的 ISSI=Ya 清单优先于
+        STOCK_LIST；离线时只允许使用上一次成功验证并缓存的清单。
         """
         # 优先从 .env 文件读取最新配置，这样即使在容器环境中修改了 .env 文件，
         # 也能获取到最新的股票列表配置
         env_file = os.getenv("ENV_FILE")
         env_path = Path(env_file) if env_file else (Path(__file__).parent.parent / '.env')
         stock_list_str = ''
+        sheet_url = ''
         if env_path.exists():
             # 直接从 .env 文件读取最新的配置
             env_values = dotenv_values(env_path)
             stock_list_str = (env_values.get('STOCK_LIST') or '').strip()
+            sheet_url = (env_values.get('IDX_SHARIA_STOCKS_SHEET_URL') or '').strip()
 
         # 如果 .env 文件不存在或未配置，才尝试从系统环境变量读取
         if not stock_list_str:
             stock_list_str = os.getenv('STOCK_LIST', '')
+        if not sheet_url:
+            sheet_url = os.getenv('IDX_SHARIA_STOCKS_SHEET_URL', '').strip()
 
-        stock_list = [
-            (c or "").strip().upper()
-            for c in split_stock_list(stock_list_str)
-            if (c or "").strip()
-        ]
+        self.idx_sharia_stocks_sheet_url = sheet_url or None
+        if sheet_url:
+            self.stock_list = []
+            from src.services.idx_sharia_stock_list import get_idx_sharia_stock_codes
+
+            stock_list = get_idx_sharia_stock_codes(sheet_url)
+        else:
+            stock_list = [
+                (c or "").strip().upper()
+                for c in split_stock_list(stock_list_str)
+                if (c or "").strip()
+            ]
 
         self.stock_list = stock_list
     
@@ -3266,7 +3284,7 @@ class Config:
         issues: List[ConfigIssue] = []
 
         # --- Stock list ---
-        if not self.stock_list:
+        if not self.stock_list and not self.idx_sharia_stocks_sheet_url:
             issues.append(ConfigIssue(
                 severity="error",
                 message="未配置 STOCK_LIST。请设置至少一个股票代码，例如：600519,hk00700,AAPL。",
