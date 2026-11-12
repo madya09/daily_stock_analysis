@@ -436,22 +436,23 @@ git push
 
 ### Schedule Details
 
-Default configuration: **Monday to Friday, 18:00 Beijing Time** auto-execution
+Default configuration: **Monday to Friday at 16:30 Western Indonesian Time (WIB)** for IDX stock analysis
 
 Modify time: Edit cron expression in `.github/workflows/00-daily-analysis.yml`:
 
 ```yaml
 schedule:
-  - cron: '0 10 * * 1-5'  # UTC time, +8 = Beijing time
+  - cron: '30 9 * * 1-5'  # UTC time, +7 = 16:30 WIB
 ```
 
 Common cron examples:
-| Expression | Description |
+| Expression | Description (WIB) |
 |--------|------|
-| `'0 10 * * 1-5'` | Mon-Fri 18:00 (Beijing) |
-| `'30 7 * * 1-5'` | Mon-Fri 15:30 (Beijing) |
-| `'0 10 * * *'` | Daily 18:00 (Beijing) |
-| `'0 2 * * 1-5'` | Mon-Fri 10:00 (Beijing) |
+| `'30 9 * * 1-5'` | Mon-Fri 16:30 |
+| `'0 11 * * 1-5'` | Mon-Fri 18:00 |
+| `'0 5 * * 1-5'` | Mon-Fri 12:00 |
+
+The scheduled Actions run defaults to `stocks-only` and does not create an additional China market review. See the [GitHub Actions schedule guide](./full-guide_EN.md#scheduled-task-configuration) for IDX and Telegram setup.
 
 ### Modify Watchlist
 

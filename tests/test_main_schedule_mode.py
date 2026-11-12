@@ -598,6 +598,34 @@ class MainScheduleModeTestCase(unittest.TestCase):
             ["sh000016", "sh600519", "csi930955"],
         )
 
+    def test_actions_refreshes_sharia_sheet_before_target_classification(self) -> None:
+        args = self._make_args()
+        config = self._make_config(run_immediately=True)
+        config.stock_list = ["600519"]
+        refresh_stock_list = MagicMock(
+            side_effect=lambda: setattr(config, "stock_list", ["BBCA.JK"])
+        )
+        config.refresh_stock_list = refresh_stock_list
+
+        with patch.dict(os.environ, {"GITHUB_ACTIONS": "true"}), \
+             patch("main.parse_arguments", return_value=args), \
+             patch("main.get_config", return_value=config), \
+             patch("main.setup_logging"), \
+             patch("main._refresh_stock_index_cache_for_analysis"), \
+             patch("main.run_full_analysis") as run_full_analysis:
+            exit_code = main.main()
+
+        self.assertEqual(exit_code, 0)
+        refresh_stock_list.assert_called_once_with()
+        self.assertEqual(run_full_analysis.call_args.args[2], ["BBCA.JK"])
+        self.assertEqual(
+            [
+                target.asset_type
+                for target in run_full_analysis.call_args.kwargs["analysis_targets"]
+            ],
+            ["stock"],
+        )
+
     def test_standalone_run_local_default_does_not_build_targets(self) -> None:
         """非 Actions 环境的无参数默认路径不构造结构化 targets（本地/
         `--schedule` 热刷新语义保持不变）。"""

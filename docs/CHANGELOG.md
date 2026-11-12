@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 - [新功能] 支持 IDX `.JK` 个股通过 YFinance 分析；配置公开 Google 表格时按 `ISSI=Ya` 动态加载股票清单，更新失败仅回退到最近一次有效缓存，不会改用未筛选的 `STOCK_LIST`。
+- [改进] GitHub Actions 每个工作日 16:30 WIB 运行 IDX 股票分析，刷新 syariah 表格清单并跨 runner 缓存最近有效快照；定时任务默认只跑个股分析，Telegram 和表格 URL 可通过 Actions Secrets 配置。
 - [文档] 恢复 README、部署指南及模型/搜索配置表中的 Anspire 可点击链接并保留推广码，继续作为 SerpAPI 后的可选搜索服务。
 
 - [改进] 下线 Anspire 合作宣传及专属额度说明，移除 README 推荐入口，调整配置示例和渠道展示顺序；新闻搜索顺序调整至 SerpAPI 之后，保留原推广码链接、已有 Key 和模型渠道兼容。

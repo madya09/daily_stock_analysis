@@ -180,7 +180,7 @@ To get started quickly, you need at minimum:
 
 1. **AI Model**: Follow the [Modelflare Channels example](LLM_CONFIG_GUIDE_EN.md#example-modelflare), or use `AIHUBMIX_KEY` (one key for multiple model families), `GEMINI_API_KEY`, or `OPENAI_API_KEY`
 2. **Notification Channel**: At least one, e.g., `WECHAT_WEBHOOK_URL` or `EMAIL_SENDER` + `EMAIL_PASSWORD`
-3. **Stock List**: `STOCK_LIST` (required)
+3. **Stock List**: `STOCK_LIST`, or `IDX_SHARIA_STOCKS_SHEET_URL` for IDX runs
 4. **Search API**: `SERPAPI_API_KEYS` or `TAVILY_API_KEYS`; `ANSPIRE_API_KEYS` remains optional
 
 > Configure these 4 items and you're ready to go!
@@ -201,7 +201,7 @@ To get started quickly, you need at minimum:
 
 ### 5. Done!
 
-Default schedule: Every weekday at **18:00 (Beijing Time)** automatic execution.
+The default GitHub Actions workflow runs IDX stock analysis every weekday at **16:30 WIB**.
 
 ---
 
@@ -717,6 +717,10 @@ The GitHub Actions daily workflow (`.github/workflows/00-daily-analysis.yml`) an
 
 > **Phase 2 boundary**: `--schedule`, Bot `/ask`, and Bot `/batch` still do not expose index entrypoints. Web/API, Bot `/analyze`, the one-shot `--stocks` entry, and the GitHub Actions daily workflow support indices.
 
+The bundled Actions schedule runs **Monday through Friday at 16:30 WIB** (`30 9 * * 1-5` in UTC) and uses `stocks-only`, so it does not also generate the default China market review. Manual dispatch still offers `full`, `market-only`, and `stocks-only`. For IDX runs, the workflow refreshes `IDX_SHARIA_STOCKS_SHEET_URL` before classifying the watchlist. An Actions cache carries the last validated IDX ticker snapshot across ephemeral runners for temporary sheet/network outages.
+
+In repository `Settings → Secrets and variables → Actions`, add `IDX_SHARIA_STOCKS_SHEET_URL`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, and `NOTIFICATION_REPORT_CHANNELS` with the value `telegram`. Also add the API key secret for the LLM provider you selected, or analysis cannot be generated. `TELEGRAM_MESSAGE_THREAD_ID` is optional for Telegram topics. The Sheet URL may be stored as a Secret or Repository Variable; make sure the sheet allows the runner to fetch its CSV export.
+
 ### Index watchlist configuration
 
 `STOCK_LIST` accepts index targets mixed in with stocks under the following rules at two entry points: the one-shot `--stocks` argument and the GitHub Actions daily workflow (`GITHUB_ACTIONS=true` no-arg `full`/`stocks-only` runs). Local `.env`/Docker no-arg default runs do not participate in index classification; `STOCK_LIST` keeps its existing stock semantics there. To analyze indices from local `.env`/Docker, pass `--stocks` explicitly (one-shot run) or use the GitHub Actions entry. Classification runs before stock parsing: an explicit form that matches a registered index takes the `market=cn` index Pipeline; anything else continues on the stock path (`.CSI` prefixed forms excepted — see the rejection rule below). The classification happens **before normalization**, so you must write an explicit code form; bare codes are never "auto-promoted".
@@ -788,19 +792,20 @@ Edit `.github/workflows/00-daily-analysis.yml`:
 
 ```yaml
 schedule:
-  # UTC time, Beijing time = UTC + 8
-  - cron: '0 10 * * 1-5'   # Monday to Friday 18:00 (Beijing Time)
+  # GitHub cron uses UTC; WIB = UTC + 7
+  - cron: '30 9 * * 1-5'   # Monday to Friday 16:30 WIB
 ```
 
 Common time reference:
 
-| Beijing Time | UTC cron expression |
-|---------|----------------|
-| 09:30 | `'30 1 * * 1-5'` |
-| 12:00 | `'0 4 * * 1-5'` |
-| 15:00 | `'0 7 * * 1-5'` |
-| 18:00 | `'0 10 * * 1-5'` |
-| 21:00 | `'0 13 * * 1-5'` |
+| WIB | UTC cron expression |
+|-----|----------------------|
+| 08:30 | `'30 1 * * 1-5'` |
+| 12:00 | `'0 5 * * 1-5'` |
+| 16:30 | `'30 9 * * 1-5'` |
+| 18:00 | `'0 11 * * 1-5'` |
+
+GitHub Actions scheduled runs may start late under platform load; the market calendar skips exchange holidays. The scheduled Actions workflow analyzes the watchlist only and does not run a market review.
 
 ### Local Scheduled Tasks
 

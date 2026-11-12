@@ -1,9 +1,9 @@
 name: 每日股票分析
 
 on:
-  # 定时触发 - 每天北京时间 18:00 (UTC 10:00)
+  # 定时触发 - 周一至周五 16:30 WIB (UTC 09:30)
   schedule:
-    - cron: '0 10 * * 1-5'     # 周一到周五，UTC 10:00 = 北京时间 18:00
+    - cron: '30 9 * * 1-5'     # 周一到周五，UTC 09:30 = Jakarta 16:30
   
   # 手动触发
   workflow_dispatch:
@@ -58,10 +58,19 @@ jobs:
       
       - name: 创建必要目录
         run: |
-          mkdir -p data logs reports
+          mkdir -p data/cache logs reports
+
+      - name: 恢复 IDX syariah 股票清单缓存
+        uses: actions/cache@v4
+        with:
+          path: data/cache/idx_sharia_stock_list.json
+          key: idx-sharia-stock-list-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            idx-sharia-stock-list-
       
       - name: 执行股票分析
         env:
+          TZ: Asia/Jakarta
           # ==========================================
           # AI 配置
           # ==========================================
@@ -422,6 +431,7 @@ jobs:
           # ==========================================
           # 自选股配置
           # ==========================================
+          IDX_SHARIA_STOCKS_SHEET_URL: ${{ vars.IDX_SHARIA_STOCKS_SHEET_URL || secrets.IDX_SHARIA_STOCKS_SHEET_URL }}
           # 避免直接写入 STOCK_LIST，保留同名 Environment variables 的 runner 环境值。
           STOCK_LIST_CONFIG: ${{ vars.STOCK_LIST || secrets.STOCK_LIST }}
           MARKET_REVIEW_REGION: ${{ vars.MARKET_REVIEW_REGION || secrets.MARKET_REVIEW_REGION || 'cn' }}
@@ -454,10 +464,10 @@ jobs:
           # 解析自选股配置：
           # 1. Repository/Environment secrets 或 Repository variables（STOCK_LIST_CONFIG）
           # 2. 同名 Environment variables 注入的 runner 环境变量（STOCK_LIST）
-          # 3. 最小默认值
+          # 3. 最小默认值（未配置 Google Sheet 时）
           if [ -n "${STOCK_LIST_CONFIG:-}" ]; then
             export STOCK_LIST="$STOCK_LIST_CONFIG"
-          elif [ -z "${STOCK_LIST:-}" ]; then
+          elif [ -z "${STOCK_LIST:-}" ] && [ -z "${IDX_SHARIA_STOCKS_SHEET_URL:-}" ]; then
             export STOCK_LIST="600519"
           fi
 
@@ -472,14 +482,18 @@ jobs:
           fi
 
           # 判断运行模式
-          MODE="${{ github.event.inputs.mode || 'full' }}"
+          MODE="${{ github.event_name == 'schedule' && 'stocks-only' || github.event.inputs.mode || 'full' }}"
           
           echo "=========================================="
           echo "🚀 A股自选股智能分析系统"
           echo "=========================================="
           echo "⏰ 时间: $(TZ='Asia/Shanghai' date '+%Y-%m-%d %H:%M:%S')"
           echo "🎯 运行模式: $MODE"
-          echo "📊 自选股: $STOCK_LIST"
+          if [ -n "${IDX_SHARIA_STOCKS_SHEET_URL:-}" ]; then
+            echo "📊 自选股: Google Sheets（仅 ISSI=Ya）"
+          else
+            echo "📊 自选股: $STOCK_LIST"
+          fi
           echo "📝 报告类型: $REPORT_TYPE"
           echo ""
           echo "=========================================="

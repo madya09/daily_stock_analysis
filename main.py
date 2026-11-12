@@ -1781,6 +1781,11 @@ def main() -> int:
         # 结构化 target，显式指数 token 进入指数路径、个股 token 保持既有路径。
         # 不消费个股列表的模式由 _skips_stock_entry 整体跳过（不刷新不分类），
         # 本地默认路径不在本入口构造 target。
+        # Refresh first so an IDX sheet-backed list replaces any bootstrap STOCK_LIST
+        # before the Actions-specific structured target classification.
+        refresh_stock_list = getattr(config, "refresh_stock_list", None)
+        if callable(refresh_stock_list):
+            refresh_stock_list()
         raw_value = config.stock_list or []
         raw_tokens = (
             split_stock_list(raw_value)

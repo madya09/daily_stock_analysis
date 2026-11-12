@@ -207,7 +207,7 @@ daily_stock_analysis/
 
 1. **AI 模型**：按 [Modelflare Channels 示例](LLM_CONFIG_GUIDE.md#示例modelflare) 配置，或使用 `AIHUBMIX_KEY`（[AIHubmix](https://inferera.com/?aff=CfMq)，一 Key 多模型）、`GEMINI_API_KEY` 或 `OPENAI_API_KEY`
 2. **通知渠道**：至少配置一个，如 `WECHAT_WEBHOOK_URL` 或 `EMAIL_SENDER` + `EMAIL_PASSWORD`
-3. **股票列表**：`STOCK_LIST`（必填）
+3. **股票列表**：`STOCK_LIST`，或 IDX 运行时的 `IDX_SHARIA_STOCKS_SHEET_URL`
 4. **搜索 API**：`SERPAPI_API_KEYS` 或 `TAVILY_API_KEYS`；`ANSPIRE_API_KEYS` 仍可选用
 
 > 💡 配置完以上 4 项即可开始使用！
@@ -228,7 +228,7 @@ daily_stock_analysis/
 
 ### 5. 完成！
 
-默认每个工作日 **18:00（北京时间）** 自动执行。
+默认的 GitHub Actions workflow 每个工作日 **16:30 WIB** 执行 IDX 个股分析。
 
 ---
 
@@ -773,6 +773,10 @@ Bot `/analyze` 已支持已登记指数的显式代码（`sh000016`）、CSI ali
 
 GitHub Actions 每日工作流（`.github/workflows/00-daily-analysis.yml`）把 `STOCK_LIST` 配置中的显式指数 token 与个股同批分析：`GITHUB_ACTIONS=true` 环境下 `python main.py` 无参数运行时（`full` 与 `stocks-only` 模式；`market-only` 不经个股列表，不参与此分类），`STOCK_LIST` 会按与 `--stocks` 相同的判型规则分类为结构化 target，显式指数 token（如 `sh000016`、`930955.CSI`）进入指数路径、个股 token 保持既有路径，不新增第二条 Pipeline 或能力矩阵；含未登记 `.CSI` 目标时整批拒绝本轮运行。本地无参数默认路径（`.env`/Docker 的 `STOCK_LIST`）与 `--schedule`/`config.schedule_enabled` 定时模式不参与此分类：本地 `--stocks` 参与分类，但本地无参默认路径与定时模式不经 `--stocks` 构造 targets，`STOCK_LIST` 的其它运行环境语义不变。
 
+默认的 Actions 定时触发为**周一至周五 16:30 WIB**（cron 使用 UTC：`30 9 * * 1-5`），且计划触发使用 `stocks-only`，不额外生成默认的 A 股大盘复盘；手动触发仍可选择 `full`、`market-only` 或 `stocks-only`。IDX 定时分析会先刷新配置的 `IDX_SHARIA_STOCKS_SHEET_URL`，再分类并分析其 `ISSI=Ya` 代码。工作流通过 Actions cache 在无状态 runner 之间保留最近一次验证过的 IDX 股票清单，供表格暂时不可用时使用。
+
+在仓库 `Settings → Secrets and variables → Actions` 添加 `IDX_SHARIA_STOCKS_SHEET_URL`、`TELEGRAM_BOT_TOKEN`、`TELEGRAM_CHAT_ID` 和 `NOTIFICATION_REPORT_CHANNELS`（值设为 `telegram`）。还需添加所选 LLM 服务商对应的 API key secret，否则无法生成 AI 分析；可选项如 Telegram Topic 再设置 `TELEGRAM_MESSAGE_THREAD_ID`。工作流会将这些固定名称显式传给分析任务。Google Sheet URL 可放 Secret，也可放 Repository Variable；请确保表格允许 Actions runner 读取导出的 CSV。
+
 > **Phase 2 边界**：`--schedule`、Bot `/ask`、Bot `/batch` 仍未开放指数入口；Web/API、Bot `/analyze`、一次性 `--stocks` 与 GitHub Actions 每日工作流已支持指数。
 
 ### 指数自选股配置
@@ -846,19 +850,20 @@ OpenD 默认地址为 `127.0.0.1:11111`，可用 `FUTU_OPEND_HOST` / `FUTU_OPEND
 
 ```yaml
 schedule:
-  # UTC 时间，北京时间 = UTC + 8
-  - cron: '0 10 * * 1-5'   # 周一到周五 18:00（北京时间）
+  # GitHub cron 使用 UTC；WIB = UTC + 7
+  - cron: '30 9 * * 1-5'   # 周一到周五 16:30 WIB
 ```
 
 常用时间对照：
 
-| 北京时间 | UTC cron 表达式 |
-|---------|----------------|
-| 09:30 | `'30 1 * * 1-5'` |
-| 12:00 | `'0 4 * * 1-5'` |
-| 15:00 | `'0 7 * * 1-5'` |
-| 18:00 | `'0 10 * * 1-5'` |
-| 21:00 | `'0 13 * * 1-5'` |
+| WIB | UTC cron 表达式 |
+|-----|----------------|
+| 08:30 | `'30 1 * * 1-5'` |
+| 12:00 | `'0 5 * * 1-5'` |
+| 16:30 | `'30 9 * * 1-5'` |
+| 18:00 | `'0 11 * * 1-5'` |
+
+GitHub Actions 的计划任务可能因平台负载延迟启动；市场假休由股票市场日历过滤。Actions 计划任务默认只分析股票清单，不运行大盘复盘。
 
 #### GitHub Actions 非交易日手动运行（Issue #461 / #466）
 
