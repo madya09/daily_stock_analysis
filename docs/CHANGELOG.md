@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- [修复] 恢复完整报告语言 API 与中英韩印尼语标签/分析辅助函数，修复日常分析启动导入失败及印尼语报告动作标签缺失，并补充导入契约和多语言行为回归测试。
 - [改进] 个股分析与 Telegram 通知新增印尼语 `REPORT_LANGUAGE=id`；GitHub Actions 股票分析默认改为输出印尼语，仍可通过 Actions Variables/Secrets 覆盖。
 - [新功能] 支持 IDX `.JK` 个股通过 YFinance 分析；配置公开 Google 表格时按 `ISSI=Ya` 动态加载股票清单，更新失败仅回退到最近一次有效缓存，不会改用未筛选的 `STOCK_LIST`。
 - [改进] GitHub Actions 每个工作日 16:30 WIB 运行 IDX 股票分析，刷新 syariah 表格清单并跨 runner 缓存最近有效快照；定时任务默认只跑个股分析，Telegram 和表格 URL 可通过 Actions Secrets 配置。
