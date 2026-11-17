@@ -4303,7 +4303,10 @@ Output strictly in the following JSON format. This is a complete Decision Dashbo
                 result = self._parse_response(response_text, code, name)
                 result.raw_response = response_text
                 result.search_performed = bool(news_context)
-                result.market_snapshot = self._build_market_snapshot(context)
+                result.market_snapshot = self._build_market_snapshot(
+                    context,
+                    report_language=report_language,
+                )
                 result.model_used = model_used
                 result.report_language = report_language
                 normalize_chip_structure_availability(result, context.get("chip"))
@@ -5190,7 +5193,18 @@ Keluarkan seluruh Dasbor Keputusan dalam format JSON."""
         """格式化成交量显示"""
         if volume is None:
             return 'N/A'
-        if normalize_report_language(report_language) in ("en", "ko", "id"):
+        language = normalize_report_language(report_language)
+        if language == "id":
+            if volume >= 1e12:
+                return f"{volume / 1e12:.2f}".replace(".", ",") + " triliun saham"
+            if volume >= 1e9:
+                return f"{volume / 1e9:.2f}".replace(".", ",") + " miliar saham"
+            if volume >= 1e6:
+                return f"{volume / 1e6:.2f}".replace(".", ",") + " juta saham"
+            if volume >= 1e3:
+                return f"{volume / 1e3:.2f}".replace(".", ",") + " ribu saham"
+            return f"{volume:.0f} saham"
+        if language in ("en", "ko"):
             return f"{self._format_scaled_number_en(volume)} shares"
         if volume >= 1e8:
             return f"{volume / 1e8:.2f} 亿股"
@@ -5203,7 +5217,18 @@ Keluarkan seluruh Dasbor Keputusan dalam format JSON."""
         """格式化成交额显示"""
         if amount is None:
             return 'N/A'
-        if normalize_report_language(report_language) in ("en", "ko", "id"):
+        language = normalize_report_language(report_language)
+        if language == "id":
+            if amount >= 1e12:
+                return f"{amount / 1e12:.2f}".replace(".", ",") + " triliun"
+            if amount >= 1e9:
+                return f"{amount / 1e9:.2f}".replace(".", ",") + " miliar"
+            if amount >= 1e6:
+                return f"{amount / 1e6:.2f}".replace(".", ",") + " juta"
+            if amount >= 1e3:
+                return f"{amount / 1e3:.2f}".replace(".", ",") + " ribu"
+            return f"{amount:.0f}"
+        if language in ("en", "ko"):
             return self._format_scaled_number_en(amount)
         if amount >= 1e8:
             return f"{amount / 1e8:.2f} 亿元"
@@ -5241,7 +5266,11 @@ Keluarkan seluruh Dasbor Keputusan dalam format JSON."""
         except (TypeError, ValueError):
             return 'N/A'
 
-    def _build_market_snapshot(self, context: Dict[str, Any]) -> Dict[str, Any]:
+    def _build_market_snapshot(
+        self,
+        context: Dict[str, Any],
+        report_language: str = "zh",
+    ) -> Dict[str, Any]:
         """构建当日行情快照（展示用）"""
         today = context.get('today', {}) or {}
         realtime = context.get('realtime', {}) or {}
@@ -5275,8 +5304,8 @@ Keluarkan seluruh Dasbor Keputusan dalam format JSON."""
             "pct_chg": self._format_percent(today.get('pct_chg')),
             "change_amount": self._format_price(change_amount),
             "amplitude": self._format_percent(amplitude),
-            "volume": self._format_volume(today.get('volume')),
-            "amount": self._format_amount(today.get('amount')),
+            "volume": self._format_volume(today.get('volume'), report_language),
+            "amount": self._format_amount(today.get('amount'), report_language),
         }
 
         if realtime:

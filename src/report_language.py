@@ -116,6 +116,10 @@ _TREND_PREDICTION_CANONICAL_MAP = {
     "强烈看空": "strong_bearish",
     "strong bearish": "strong_bearish",
     "very bearish": "strong_bearish",
+    "sangat naik": "strong_bullish",
+    "naik": "bullish",
+    "turun": "bearish",
+    "sangat turun": "strong_bearish",
     "강한 상승": "strong_bullish",
     "상승": "bullish",
     "횡보": "sideways",
@@ -127,11 +131,11 @@ _TREND_PREDICTION_CANONICAL_MAP = {
 }
 
 _TREND_PREDICTION_TRANSLATIONS = {
-    "strong_bullish": {"zh": "强烈看多", "en": "Strong Bullish", "ko": "강한 상승", "id": "Sangat Bullish"},
-    "bullish": {"zh": "看多", "en": "Bullish", "ko": "상승", "id": "Bullish"},
+    "strong_bullish": {"zh": "强烈看多", "en": "Strong Bullish", "ko": "강한 상승", "id": "Sangat Naik"},
+    "bullish": {"zh": "看多", "en": "Bullish", "ko": "상승", "id": "Naik"},
     "sideways": {"zh": "震荡", "en": "Sideways", "ko": "횡보", "id": "Mendatar"},
-    "bearish": {"zh": "看空", "en": "Bearish", "ko": "하락", "id": "Bearish"},
-    "strong_bearish": {"zh": "强烈看空", "en": "Strong Bearish", "ko": "강한 하락", "id": "Sangat Bearish"},
+    "bearish": {"zh": "看空", "en": "Bearish", "ko": "하락", "id": "Turun"},
+    "strong_bearish": {"zh": "强烈看空", "en": "Strong Bearish", "ko": "강한 하락", "id": "Sangat Turun"},
 }
 
 _CONFIDENCE_LEVEL_CANONICAL_MAP = {
@@ -870,7 +874,7 @@ _REPORT_LABELS: Dict[str, Dict[str, str]] = {
         "data_sources_label": "Sumber Data",
         "data_perspective_heading": "Tinjauan Data",
         "ma_alignment_label": "Susunan MA",
-        "bullish_alignment_label": "Susunan Bullish",
+        "bullish_alignment_label": "Urutan Tren Naik",
         "yes_label": "Ya",
         "no_label": "Tidak",
         "none_label": "Tidak ada",

@@ -163,7 +163,11 @@ class IndonesianReportLanguageTestCase(unittest.TestCase):
         self.assertEqual(labels["report_title"], "Laporan Analisis Saham")
         self.assertEqual(localize_operation_advice("买入", "id"), "Beli")
         self.assertEqual(localize_operation_advice("Beli", "en"), "Buy")
-        self.assertEqual(localize_trend_prediction("看多", "id"), "Bullish")
+        self.assertEqual(localize_trend_prediction("看多", "id"), "Naik")
+        self.assertEqual(localize_trend_prediction("看空", "id"), "Turun")
+        self.assertEqual(localize_trend_prediction("strong bullish", "id"), "Sangat Naik")
+        self.assertEqual(localize_trend_prediction("strong bearish", "id"), "Sangat Turun")
+        self.assertEqual(get_report_labels("id")["bullish_alignment_label"], "Urutan Tren Naik")
         self.assertEqual(localize_trend_prediction("Sangat Bullish", "en"), "Strong Bullish")
 
 

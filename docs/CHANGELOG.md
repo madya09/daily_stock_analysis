@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- [改进] 修正印尼语行情快照的成交量、成交额单位与趋势标签，并保留中文及英文格式。
 - [修复] 恢复完整报告语言 API 与中英韩印尼语标签/分析辅助函数，修复日常分析启动导入失败及印尼语报告动作标签缺失，并补充导入契约和多语言行为回归测试。
 - [改进] 个股分析与 Telegram 通知新增印尼语 `REPORT_LANGUAGE=id`；GitHub Actions 股票分析默认改为输出印尼语，仍可通过 Actions Variables/Secrets 覆盖。
 - [新功能] 支持 IDX `.JK` 个股通过 YFinance 分析；配置公开 Google 表格时按 `ISSI=Ya` 动态加载股票清单，更新失败仅回退到最近一次有效缓存，不会改用未筛选的 `STOCK_LIST`。

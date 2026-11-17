@@ -134,6 +134,51 @@ class TestAnalyzerGenerateText:
             analyzer._config_override = cfg
             return analyzer
 
+    @pytest.mark.parametrize(
+        ("language", "expected_volume", "expected_amount"),
+        [
+            ("id", "146,00 juta saham", "316,00 miliar"),
+            ("zh", "1.46 亿股", "3159.99 亿元"),
+            ("en", "146.00M shares", "316.00B"),
+        ],
+    )
+    def test_market_snapshot_formats_volume_and_amount_by_report_language(
+        self, language, expected_volume, expected_amount
+    ):
+        from src.analyzer import GeminiAnalyzer
+
+        analyzer = GeminiAnalyzer.__new__(GeminiAnalyzer)
+        language_kwargs = {} if language == "zh" else {"report_language": language}
+        snapshot = analyzer._build_market_snapshot(
+            {
+                "today": {
+                    "volume": 146_000_000,
+                    "amount": 315_999_000_000,
+                },
+            },
+            **language_kwargs,
+        )
+
+        assert snapshot["volume"] == expected_volume
+        assert snapshot["amount"] == expected_amount
+
+    def test_indonesian_market_snapshot_formats_trillion_units(self):
+        from src.analyzer import GeminiAnalyzer
+
+        analyzer = GeminiAnalyzer.__new__(GeminiAnalyzer)
+        snapshot = analyzer._build_market_snapshot(
+            {
+                "today": {
+                    "volume": 1_250_000_000_000,
+                    "amount": 1_250_000_000_000,
+                },
+            },
+            report_language="id",
+        )
+
+        assert snapshot["volume"] == "1,25 triliun saham"
+        assert snapshot["amount"] == "1,25 triliun"
+
     @pytest.mark.parametrize("streamed", [False, True])
     @pytest.mark.parametrize("fallback", [False, True])
     def test_analyze_logs_actual_response_and_only_real_route_fallback(self, caplog, streamed, fallback):
