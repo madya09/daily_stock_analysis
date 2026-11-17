@@ -1,9 +1,9 @@
 name: 每日股票分析
 
 on:
-  # 定时触发 - 周一至周五 16:30 WIB (UTC 09:30)
   schedule:
-    - cron: '30 9 * * 1-5'     # 周一到周五，UTC 09:30 = Jakarta 16:30
+    - cron: '28 16 * * 1-5'
+      timezone: 'Asia/Jakarta'
   
   # 手动触发
   workflow_dispatch:
